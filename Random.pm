@@ -4,36 +4,35 @@
 # A module used to generate random data.
 ################################################################################
 
-
 package Data::Random;
-
 
 ################################################################################
 # - Modules and Libraries
 ################################################################################
-require 5.005_62;
+#require 5.005_62;
 
 use lib qw(..);
 use Carp qw(cluck);
-use Data::Random::WordList;
+
+#use Data::Random::WordList;
 
 require Exporter;
-
 
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
 use vars qw(
-    @ISA
-    %EXPORT_TAGS
-    @EXPORT_OK
-    @EXPORT
+  @ISA
+  %EXPORT_TAGS
+  @EXPORT_OK
+  @EXPORT
 );
 
 @ISA = qw(Exporter);
 
 %EXPORT_TAGS = (
-    'all' => [ qw(
+    'all' => [
+        qw(
         rand_words
         rand_chars
         rand_set
@@ -42,72 +41,80 @@ use vars qw(
         rand_time
         rand_datetime
         rand_image
-    ) ]
+        )
+    ]
 );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
-@EXPORT = qw();
+@EXPORT    = qw();
 
-$Data::Random::VERSION = '0.03';
-
+$Data::Random::VERSION = '0.04';
 
 ################################################################################
 # - Subroutines
 ################################################################################
 
-
 ################################################################################
 # rand_words()
 ################################################################################
 sub rand_words {
+
     # Get the options hash
     my %options = @_;
-    
+
     # Make sure the wordlist param was specified
     cluck('a wordlist must be specified') && return if !$options{'wordlist'};
-    
+
     # Initialize max and min vars
     $options{'min'} ||= 1;
     $options{'max'} ||= 1;
-    
+
     # Make sure the max and min vars are OK
-    cluck('min value cannot be larger than max value') && return if $options{'min'} > $options{'max'};
-    cluck('min value must be a positive integer') && return if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
-    cluck('max value must be a positive integer') && return if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
-    
+    cluck('min value cannot be larger than max value') && return
+      if $options{'min'} > $options{'max'};
+    cluck('min value must be a positive integer') && return
+      if $options{'min'} < 0 || $options{'min'} != int( $options{'min'} );
+    cluck('max value must be a positive integer') && return
+      if $options{'max'} < 0 || $options{'max'} != int( $options{'max'} );
+
     # Initialize the size var
-    $options{'size'} ||= int(rand($options{'max'} - $options{'min'} + 1)) + $options{'min'};
-    
+    $options{'size'} ||=
+      int( rand( $options{'max'} - $options{'min'} + 1 ) ) + $options{'min'};
+
     # Make sure the size var is OK
-    cluck('size value must be a positive integer') && return if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
-    
+    cluck('size value must be a positive integer') && return
+      if $options{'size'} < 0 || $options{'size'} != int( $options{'size'} );
+
     # Initialize the shuffle flag
-    $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
-    
+    $options{'shuffle'} =
+      exists( $options{'shuffle'} ) ? $options{'shuffle'} : 1;
+
     my $wl;
     my $close_wl = 1;
-    
+
     # Check for a pre-existing wordlist object
-    if (ref($options{'wordlist'})) {
-        $wl = $options{'wordlist'};
+    if ( ref( $options{'wordlist'} ) ) {
+        $wl       = $options{'wordlist'};
         $close_wl = 0;
     }
     else {
+        require Data::Random::WordList;
+
         # Create a new wordlist object    
         $wl = new Data::Random::WordList( wordlist => $options{'wordlist'} );
     }
-    
+
     # Get the random words
-    my $rand_words = $wl->get_words($options{'size'});
-    
+    my $rand_words = $wl->get_words( $options{'size'} );
+
     # Close the word list
     $wl->close() if $close_wl;
-    
+
     # Shuffle the words around
     shuffle($rand_words) if $options{'shuffle'};
 
-    # Return an array or an array reference, depending on the context in which the sub was called
-    if (wantarray()) {
+# Return an array or an array reference, depending on the context in which the sub was called
+    if ( wantarray() ) {
         return @$rand_words;
     }
     else {
@@ -115,346 +122,403 @@ sub rand_words {
     }
 }
 
-
 ################################################################################
 # rand_chars()
 ################################################################################
 sub rand_chars {
+
     # Get the options hash
     my %options = @_;
-    
+
     # Build named character sets if one wasn't supplied
-    if (ref($options{'set'}) ne 'ARRAY') {
+    if ( ref( $options{'set'} ) ne 'ARRAY' ) {
         my @charset = ();
-        
-        if ($options{'set'} eq 'all') {
-            @charset = (0..9, 'a'..'z', 'A'..'Z', '#', ',', qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `));
+
+        if ( $options{'set'} eq 'all' ) {
+            @charset =
+              ( 0 .. 9, 'a' .. 'z', 'A' .. 'Z', '#', ',',
+                qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `)
+            );
         }
-        elsif ($options{'set'} eq 'alpha') {
-            @charset = ('a'..'z', 'A'..'Z');
+        elsif ( $options{'set'} eq 'alpha' ) {
+            @charset = ( 'a' .. 'z', 'A' .. 'Z' );
         }
-        elsif ($options{'set'} eq 'upperalpha') {
-            @charset = ('A'..'Z');
+        elsif ( $options{'set'} eq 'upperalpha' ) {
+            @charset = ( 'A' .. 'Z' );
         }
-        elsif ($options{'set'} eq 'loweralpha') {
-            @charset = ('a'..'z');
+        elsif ( $options{'set'} eq 'loweralpha' ) {
+            @charset = ( 'a' .. 'z' );
         }
-        elsif ($options{'set'} eq 'numeric') {
-            @charset = (0..9);
+        elsif ( $options{'set'} eq 'numeric' ) {
+            @charset = ( 0 .. 9 );
         }
-        elsif ($options{'set'} eq 'alphanumeric') {
-            @charset = (0..9, 'a'..'z', 'A'..'Z');
+        elsif ( $options{'set'} eq 'alphanumeric' ) {
+            @charset = ( 0 .. 9, 'a' .. 'z', 'A' .. 'Z' );
         }
-        elsif ($options{'set'} eq 'misc') {
-            @charset = ('#', ',', qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `));
+        elsif ( $options{'set'} eq 'misc' ) {
+            @charset =
+              ( '#', ',',
+                qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `)
+            );
         }
-        
+
         $options{'set'} = \@charset;
     }
-    
+
     return rand_set(%options);
 }
-
 
 ################################################################################
 # rand_set()
 ################################################################################
 sub rand_set {
+
     # Get the options hash
     my %options = @_;
-    
+
     # Make sure the set array was defined
     cluck('set array is not defined') && return if !$options{'set'};
-    
-    $options{'size'} = 1 unless exists($options{'min'}) || exists($options{'max'}) || exists($options{'size'});
-    
+
+    $options{'size'} = 1
+      unless exists( $options{'min'} ) || exists( $options{'max'} )
+      || exists( $options{'size'} );
+
     # Initialize max and min vars
     $options{'min'} ||= 0;
-    $options{'max'} ||= @{$options{'set'}};
-    
+    $options{'max'} ||= @{ $options{'set'} };
+
     # Make sure the max and min vars are OK
-    cluck('min value cannot be larger than max value') && return if $options{'min'} > $options{'max'};
-    cluck('min value must be a positive integer') && return if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
-    cluck('max value must be a positive integer') && return if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
-       
+    cluck('min value cannot be larger than max value') && return
+      if $options{'min'} > $options{'max'};
+    cluck('min value must be a positive integer') && return
+      if $options{'min'} < 0 || $options{'min'} != int( $options{'min'} );
+    cluck('max value must be a positive integer') && return
+      if $options{'max'} < 0 || $options{'max'} != int( $options{'max'} );
+
     # Initialize the size var
-    $options{'size'} ||= int(rand($options{'max'} - $options{'min'} + 1)) + $options{'min'};
-    
+    $options{'size'} ||=
+      int( rand( $options{'max'} - $options{'min'} + 1 ) ) + $options{'min'};
+
     # Make sure the size var is OK
-    cluck('size value must be a positive integer') && return if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
-    cluck('size value exceeds set size') && return if $options{'size'} > @{$options{'set'}};
-    
+    cluck('size value must be a positive integer') && return
+      if $options{'size'} < 0 || $options{'size'} != int( $options{'size'} );
+    cluck('size value exceeds set size') && return
+      if $options{'size'} > @{ $options{'set'} };
+
     # Initialize the shuffle flag
-    $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
-    
+    $options{'shuffle'} =
+      exists( $options{'shuffle'} ) ? $options{'shuffle'} : 1;
+
     # Get the random items
     my %results = ();
-    for(my $i = 0; $i < $options{'size'}; $i++) {
+    for ( my $i = 0 ; $i < $options{'size'} ; $i++ ) {
         my $result;
-        
+
         do {
-            $result = int(rand(@{$options{'set'}}));
-        } while (exists($results{$result}));
+            $result = int( rand( @{ $options{'set'} } ) );
+        } while ( exists( $results{$result} ) );
 
         $results{$result} = 1;
     }
-    
-    my @results = sort { $a <=> $b } keys %results;
-    
-    # Shuffle the items
-    shuffle(\@results) if $options{'shuffle'};
 
-    # Return an array or an array reference, depending on the context in which the sub was called
-    if (wantarray()) {
-        return @{$options{'set'}}[@results];
+    my @results = sort { $a <=> $b } keys %results;
+
+    # Shuffle the items
+    shuffle( \@results ) if $options{'shuffle'};
+
+# Return an array or an array reference, depending on the context in which the sub was called
+    if ( wantarray() ) {
+        return @{ $options{'set'} }[@results];
     }
     else {
-        return \@{$options{'set'}}[@results];
+        return \@{ $options{'set'} }[@results];
     }
 }
-
 
 ################################################################################
 # rand_enum()
 ################################################################################
 sub rand_enum {
+
     # Get the options hash
     my %options = @_;
-    
+
     # Make sure the set array was defined
     cluck('set array is not defined') && return if !$options{'set'};
-   
-    return $options{'set'}->[int(rand(@{$options{'set'}}))];
-}
 
+    return $options{'set'}->[ int( rand( @{ $options{'set'} } ) ) ];
+}
 
 ################################################################################
 # rand_date()
 ################################################################################
 sub rand_date {
+
     # Get the options hash
     my %options = @_;
-    
+
     # use the Date::Calc module
     eval q{ use Date::Calc };
-    
+
     cluck($@) && return if $@;
-    
-    my ($min_year, $min_month, $min_day, $max_year, $max_month, $max_day);
-    
+
+    my ( $min_year, $min_month, $min_day, $max_year, $max_month, $max_day );
+
     # Get today's date
-    my ($year, $month, $day) = Date::Calc::Today();
-    
-    if ($options{'min'}) {
-        if ($options{'min'} eq 'now') {
-            ($min_year, $min_month, $min_day) = ($year, $month, $day);
+    my ( $year, $month, $day ) = Date::Calc::Today();
+
+    if ( $options{'min'} ) {
+        if ( $options{'min'} eq 'now' ) {
+            ( $min_year, $min_month, $min_day ) = ( $year, $month, $day );
         }
         else {
-            ($min_year, $min_month, $min_day) = split(/\-/, $options{'min'});
+            ( $min_year, $min_month, $min_day ) =
+              split ( /\-/, $options{'min'} );
         }
     }
     else {
-        ($min_year, $min_month, $min_day) = ($year, $month, $day);
+        ( $min_year, $min_month, $min_day ) = ( $year, $month, $day );
     }
 
-    if ($options{'max'}) {
-        if ($options{'max'} eq 'now') {
-            ($max_year, $max_month, $max_day) = ($year, $month, $day);
+    if ( $options{'max'} ) {
+        if ( $options{'max'} eq 'now' ) {
+            ( $max_year, $max_month, $max_day ) = ( $year, $month, $day );
         }
         else {
-            ($max_year, $max_month, $max_day) = split(/\-/, $options{'max'});
+            ( $max_year, $max_month, $max_day ) =
+              split ( /\-/, $options{'max'} );
         }
     }
     else {
-        ($max_year, $max_month, $max_day) = Date::Calc::Add_Delta_YMD($min_year, $min_month, $min_day, 1, 0, 0);
-    }    
-        
-    my $delta_days = Date::Calc::Delta_Days(
-        $min_year, $min_month, $min_day,
-        $max_year, $max_month, $max_day,
-    );
-    
+        ( $max_year, $max_month, $max_day ) =
+          Date::Calc::Add_Delta_YMD( $min_year, $min_month, $min_day, 1, 0, 0 );
+    }
+
+    my $delta_days =
+      Date::Calc::Delta_Days( $min_year, $min_month, $min_day, $max_year,
+        $max_month, $max_day, );
+
     cluck('max date is later than min date') && return if $delta_days < 0;
-    
-    $delta_days = int(rand($delta_days + 1));
-    
-    ($year, $month, $day) = Date::Calc::Add_Delta_Days($min_year, $min_month, $min_day, $delta_days);
-    
-    return sprintf("%04u-%02u-%02u", $year, $month, $day);
-}
 
+    $delta_days = int( rand( $delta_days + 1 ) );
+
+    ( $year, $month, $day ) =
+      Date::Calc::Add_Delta_Days( $min_year, $min_month, $min_day,
+        $delta_days );
+
+    return sprintf( "%04u-%02u-%02u", $year, $month, $day );
+}
 
 ################################################################################
 # rand_time()
 ################################################################################
 sub rand_time {
+
     # Get the options hash
     my %options = @_;
-    
-    my ($min_hour, $min_min, $min_sec, $max_hour, $max_min, $max_sec);
-    
-    if ($options{'min'}) {
-        if ($options{'min'} eq 'now') {
+
+    my ( $min_hour, $min_min, $min_sec, $max_hour, $max_min, $max_sec );
+
+    if ( $options{'min'} ) {
+        if ( $options{'min'} eq 'now' ) {
+
             # Get the current time
-            my ($hour, $min, $sec) = (localtime())[2, 1, 0];
-            
-            ($min_hour, $min_min, $min_sec) = ($hour, $min, $sec);
+            my ( $hour, $min, $sec ) = ( localtime() )[ 2, 1, 0 ];
+
+            ( $min_hour, $min_min, $min_sec ) = ( $hour, $min, $sec );
         }
         else {
-            ($min_hour, $min_min, $min_sec) = split(/\:/, $options{'min'});
-            
-            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_hour > 23) || ($min_hour < 0);
-            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_min > 59) || ($min_min < 0);
-            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_sec > 59) || ($min_sec < 0);
+            ( $min_hour, $min_min, $min_sec ) = split ( /\:/, $options{'min'} );
+
+            cluck('minimum time is not in valid time format HH:MM:SS') && return
+              if ( $min_hour > 23 ) || ( $min_hour < 0 );
+            cluck('minimum time is not in valid time format HH:MM:SS') && return
+              if ( $min_min > 59 ) || ( $min_min < 0 );
+            cluck('minimum time is not in valid time format HH:MM:SS') && return
+              if ( $min_sec > 59 ) || ( $min_sec < 0 );
         }
     }
     else {
-        ($min_hour, $min_min, $min_sec) = (0, 0, 0);
+        ( $min_hour, $min_min, $min_sec ) = ( 0, 0, 0 );
     }
 
-    if ($options{'max'}) {
-        if ($options{'max'} eq 'now') {
+    if ( $options{'max'} ) {
+        if ( $options{'max'} eq 'now' ) {
+
             # Get the current time
-            my ($hour, $min, $sec) = (localtime())[2, 1, 0];
-            
-            ($max_hour, $max_min, $max_sec) = ($hour, $min, $sec);
+            my ( $hour, $min, $sec ) = ( localtime() )[ 2, 1, 0 ];
+
+            ( $max_hour, $max_min, $max_sec ) = ( $hour, $min, $sec );
         }
         else {
-            ($max_hour, $max_min, $max_sec) = split(/\:/, $options{'max'});
-                
-            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_hour > 23) || ($max_hour < 0);
-            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_min > 59) || ($max_min < 0);
-            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_sec > 59) || ($max_sec < 0);
+            ( $max_hour, $max_min, $max_sec ) = split ( /\:/, $options{'max'} );
+
+            cluck('maximum time is not in valid time format HH:MM:SS') && return
+              if ( $max_hour > 23 ) || ( $max_hour < 0 );
+            cluck('maximum time is not in valid time format HH:MM:SS') && return
+              if ( $max_min > 59 ) || ( $max_min < 0 );
+            cluck('maximum time is not in valid time format HH:MM:SS') && return
+              if ( $max_sec > 59 ) || ( $max_sec < 0 );
         }
     }
     else {
-        ($max_hour, $max_min, $max_sec) = (23, 59, 59);
+        ( $max_hour, $max_min, $max_sec ) = ( 23, 59, 59 );
     }
-       
+
     my $min_secs = $min_hour * 3600 + $min_min * 60 + $min_sec;
-    my $max_secs = ($max_hour * 3600) + ($max_min * 60) + $max_sec;
-    
+    my $max_secs = ( $max_hour * 3600 ) + ( $max_min * 60 ) + $max_sec;
+
     my $delta_secs = $max_secs - $min_secs;
-    
+
     cluck('min time is later than max time') && return if $delta_secs < 0;
-    
-    $delta_secs = int(rand($delta_secs + 1));
-    
+
+    $delta_secs = int( rand( $delta_secs + 1 ) );
+
     my $result_secs = $min_secs + $delta_secs;
 
-    my $hour = int($result_secs / 3600);
-    my $min = int(($result_secs - ($hour * 3600)) / 60);
-    my $sec = $result_secs % 60;
-    
-    return sprintf("%02u:%02u:%02u", $hour, $min, $sec);
-}
+    my $hour = int( $result_secs / 3600 );
+    my $min  = int( ( $result_secs - ( $hour * 3600 ) ) / 60 );
+    my $sec  = $result_secs % 60;
 
+    return sprintf( "%02u:%02u:%02u", $hour, $min, $sec );
+}
 
 ################################################################################
 # rand_datetime()
 ################################################################################
 sub rand_datetime {
+
     # Get the options hash
     my %options = @_;
-    
+
     # use the Date::Calc module
     eval q{ use Date::Calc };
-    
+
     cluck($@) && return if $@;
-        
-    my ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec, $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec);
-    
+
+    my (
+        $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec,
+        $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec
+    );
+
     # Get today's date
-    my ($year, $month, $day, $hour, $min, $sec) = Date::Calc::Today_and_Now();
-    
-    if ($options{'min'}) {
-        if ($options{'min'} eq 'now') {
-            ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec) = ($year, $month, $day, $hour, $min, $sec);
+    my ( $year, $month, $day, $hour, $min, $sec ) = Date::Calc::Today_and_Now();
+
+    if ( $options{'min'} ) {
+        if ( $options{'min'} eq 'now' ) {
+            ( $min_year, $min_month, $min_day,
+              $min_hour, $min_min,   $min_sec )
+              = ( $year, $month, $day, $hour, $min, $sec );
         }
         else {
-            ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec) = $options{'min'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
+            ( $min_year, $min_month, $min_day,
+              $min_hour, $min_min,   $min_sec )
+              = $options{'min'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
         }
     }
     else {
-        ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec) = ($year, $month, $day, 0, 0, 0);
+        ( $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec ) =
+          ( $year, $month, $day, 0, 0, 0 );
     }
 
-    if ($options{'max'}) {
-        if ($options{'max'} eq 'now') {
-            ($max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec) = ($year, $month, $day, $hour, $min, $sec);
+    if ( $options{'max'} ) {
+        if ( $options{'max'} eq 'now' ) {
+            ( $max_year, $max_month, $max_day,
+              $max_hour, $max_min,   $max_sec )
+              = ( $year, $month, $day, $hour, $min, $sec );
         }
         else {
-            ($max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec) = $options{'max'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
+            ( $max_year, $max_month, $max_day,
+              $max_hour, $max_min,   $max_sec )
+              = $options{'max'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
         }
     }
     else {
-        ($max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec) = (Date::Calc::Add_Delta_YMD($min_year, $min_month, $min_day, 1, 0, 0), 23, 59, 59);
-    }    
-    
-    my ($delta_days, $delta_hours, $delta_mins, $delta_secs) = Date::Calc::Delta_DHMS(
+        ( $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec ) =
+          ( Date::Calc::Add_Delta_YMD( $min_year, $min_month, $min_day, 1, 0,
+              0 ), 23, 59, 59 );
+    }
+
+    my ( $delta_days, $delta_hours, $delta_mins, $delta_secs ) =
+      Date::Calc::Delta_DHMS(
         $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec,
         $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec,
     );
-       
-    cluck('max date is later than min date') && return if ($delta_days < 0) || ($delta_hours < 0) || ($delta_mins < 0) || ($delta_secs < 0);
-    
-    $delta_secs = ($delta_days * 86400) + ($delta_hours * 3600) + ($delta_mins * 60) + $delta_secs;
-    
-    $delta_secs = int(rand($delta_secs + 1));
-    
-    ($year, $month, $day, $hour, $min, $sec) = Date::Calc::Add_Delta_DHMS($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec, 0, 0, 0, $delta_secs);
-    
-    return sprintf("%04u-%02u-%02u %02u:%02u:%02u", $year, $month, $day, $hour, $min, $sec);
-}
 
+    cluck('max date is later than min date') && return
+      if ( $delta_days < 0 ) || ( $delta_hours < 0 ) || ( $delta_mins < 0 )
+      || ( $delta_secs < 0 );
+
+    $delta_secs =
+      ( $delta_days * 86400 ) + ( $delta_hours * 3600 ) + ( $delta_mins * 60 ) +
+      $delta_secs;
+
+    $delta_secs = int( rand( $delta_secs + 1 ) );
+
+    ( $year, $month, $day, $hour, $min, $sec ) = Date::Calc::Add_Delta_DHMS(
+        $min_year, $min_month, $min_day, $min_hour,
+        $min_min,  $min_sec,   0,        0,
+        0,         $delta_secs
+    );
+
+    return
+      sprintf( "%04u-%02u-%02u %02u:%02u:%02u", $year, $month, $day, $hour,
+        $min, $sec );
+}
 
 ################################################################################
 # rand_image()
 ################################################################################
 sub rand_image {
+
     # Get the options hash
     my %options = @_;
-    
+
     $options{'minwidth'} ||= 1;
     $options{'maxwidth'} ||= 100;
-    $options{'width'}    ||= int(rand($options{'maxwidth'} - $options{'minwidth'} + 1)) + $options{'minwidth'};
-    
+    $options{'width'} ||=
+      int( rand( $options{'maxwidth'} - $options{'minwidth'} + 1 ) ) +
+      $options{'minwidth'};
+
     $options{'minheight'} ||= 1;
     $options{'maxheight'} ||= 100;
-    $options{'height'}    ||= int(rand($options{'maxheight'} - $options{'minheight'} + 1)) + $options{'minheight'};
+    $options{'height'} ||=
+      int( rand( $options{'maxheight'} - $options{'minheight'} + 1 ) ) +
+      $options{'minheight'};
 
     $options{'minpixels'} ||= 0;
     $options{'maxpixels'} ||= $options{'width'} * $options{'height'};
-    $options{'pixels'}    ||= int(rand($options{'maxpixels'} - $options{'minpixels'} + 1)) + $options{'minpixels'};
-    
+    $options{'pixels'} ||=
+      int( rand( $options{'maxpixels'} - $options{'minpixels'} + 1 ) ) +
+      $options{'minpixels'};
+
     $options{'bgcolor'} ||= _color();
     $options{'fgcolor'} ||= _color();
-    
+
     eval q{ use GD; };
-    
+
     cluck($@) && return if $@;
-    
-    my $image = new GD::Image($options{'width'}, $options{'height'});
-    
-    my $bgcolor = $image->colorAllocate(@{$options{'bgcolor'}});
-    my $fgcolor = $image->colorAllocate(@{$options{'fgcolor'}});
-    
-    $image->rectangle(0, 0, $options{'width'}, $options{'height'}, $bgcolor);
-    
-    for(my $i = 0; $i < $options{'pixels'}; $i++) {
-        my $x = int(rand($options{'width'} + 1));
-        my $y = int(rand($options{'height'} + 1));
-            
-        $image->setPixel($x, $y, $fgcolor);
+
+    my $image = new GD::Image( $options{'width'}, $options{'height'} );
+
+    my $bgcolor = $image->colorAllocate( @{ $options{'bgcolor'} } );
+    my $fgcolor = $image->colorAllocate( @{ $options{'fgcolor'} } );
+
+    $image->rectangle( 0, 0, $options{'width'}, $options{'height'}, $bgcolor );
+
+    for ( my $i = 0 ; $i < $options{'pixels'} ; $i++ ) {
+        my $x = int( rand( $options{'width'} + 1 ) );
+        my $y = int( rand( $options{'height'} + 1 ) );
+
+        $image->setPixel( $x, $y, $fgcolor );
     }
-    
+
     return $image->png();
-    
+
     sub _color {
-        return [ int(rand(266)), int(rand(266)), int(rand(266)) ];
+        return [ int( rand(266) ), int( rand(266) ), int( rand(266) ) ];
     }
 }
-
 
 ################################################################################
 # shuffle()
@@ -462,16 +526,14 @@ sub rand_image {
 sub shuffle {
     my $array = shift;
 
-    for (my $i = @$array - 1; $i >= 0; $i--) {
-        my $j = int(rand($i + 1));
+    for ( my $i = @$array - 1 ; $i >= 0 ; $i-- ) {
+        my $j = int( rand( $i + 1 ) );
 
-        @$array[$i, $j] = @$array[$j, $i] if $i != $j;
+        @$array[ $i, $j ] = @$array[ $j, $i ] if $i != $j;
     }
 }
 
-
 1;
-
 
 =head1 NAME
 
@@ -765,11 +827,11 @@ fgcolor - the foreground color of the image.  The value must be a reference to a
 
 =head1 VERSION
 
-0.03
+0.04
 
 =head1 AUTHOR
 
-Adekunle Olonoh, ade@bottledsoftware.com
+Adekunle Olonoh, olonoh@yahoo.com
 
 =head1 CREDITS
 
@@ -785,3 +847,4 @@ Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free so
 Data::Random::WordList
 
 =cut
+

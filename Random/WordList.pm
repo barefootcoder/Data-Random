@@ -7,109 +7,106 @@
 #   Date: October 2000
 ################################################################################
 
-
 package Data::Random::WordList;
-
 
 ################################################################################
 # - Modules and Libraries
 ################################################################################
-require 5.005_62;
+#require 5.005_62;
 use FileHandle;
-
 
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
-$Data::Random::WordList::VERSION = '0.02';
-
+$Data::Random::WordList::VERSION = '0.04';
 
 ################################################################################
 # - Subroutines
 ################################################################################
 
-
 ################################################################################
 # new()
 ################################################################################
 sub new {
-    my $proto  = shift;
+    my $proto   = shift;
     my %options = @_;
-    
+
     # Check if what was passed in was a prototype reference or a class name
     my $class = ref($proto) || $proto;
-    
+
     # Create a new filehandle object
-    my $fh = new FileHandle $options{'wordlist'} or die "could not open $options{'wordlist'} : $!";
-    
+    my $fh = new FileHandle $options{'wordlist'}
+      or die "could not open $options{'wordlist'} : $!";
+
     # Calculate the number of lines in the file
     my $size = 0;
-    while(<$fh>) {
+    while (<$fh>) {
         $size++;
     }
 
     # Create the object
     my $self = bless {
-        'fh'  => $fh,
+        'fh'   => $fh,
         'size' => $size,
     }, $class;
 
     return $self;
 }
 
-
 ################################################################################
 # close()
 ################################################################################
 sub close {
     my $self = shift;
-    
+
     # Close the filehandle
     $self->{'fh'}->close;
 }
-
 
 ################################################################################
 # get_words()
 ################################################################################
 sub get_words {
     my $self = shift;
-    my $num = shift || 1;
+    my $num  = shift || 1;
 
     my $fh = $self->{'fh'};
-    
+
     # Perform some error checking
-    die 'the size value must be a positive integer' if $num < 0 || $num != int($num);
-    die "$num words were requested but only $self->{'size'} words exist in the wordlist" if $num > $self->{'size'};
-    
+    die 'the size value must be a positive integer'
+      if $num < 0 || $num != int($num);
+    die
+"$num words were requested but only $self->{'size'} words exist in the wordlist"
+      if $num > $self->{'size'};
+
     # Pick which lines we want
     my %rand_lines = ();
-    for(my $i = 0; $i < $num; $i++) {
+    for ( my $i = 0 ; $i < $num ; $i++ ) {
         my $rand_line;
-        
+
         do {
-            $rand_line = int(rand($self->{'size'}));
-        } while (exists($rand_lines{$rand_line}));
+            $rand_line = int( rand( $self->{'size'} ) );
+        } while ( exists( $rand_lines{$rand_line} ) );
 
         $rand_lines{$rand_line} = 1;
     }
-    
-    my $line = 0;
-    my @rand_words = ();
-    
-    # Seek to the beginning of the filehandle
-    $fh->seek(0, 0) or die "could not seek to position 0 in wordlist: $!";
-        
-    # Now get the lines
-    while(<$fh>) {
-       chomp;
-       push(@rand_words, $_) if $rand_lines{$line};
 
-       $line++;
+    my $line       = 0;
+    my @rand_words = ();
+
+    # Seek to the beginning of the filehandle
+    $fh->seek( 0, 0 ) or die "could not seek to position 0 in wordlist: $!";
+
+    # Now get the lines
+    while (<$fh>) {
+        chomp;
+        push ( @rand_words, $_ ) if $rand_lines{$line};
+
+        $line++;
     }
 
-    # Return an array or an array reference, depending on the context in which the sub was called
-    if (wantarray()) {
+# Return an array or an array reference, depending on the context in which the sub was called
+    if ( wantarray() ) {
         return @rand_words;
     }
     else {
@@ -117,9 +114,7 @@ sub get_words {
     }
 }
 
-
 1;
-
 
 =head1 NAME
 
@@ -169,11 +164,11 @@ Closes the filehandle associated with the word list.  It's good practice to do t
 
 =head1 VERSION
 
-0.02
+0.04
 
 =head1 AUTHOR
 
-Adekunle Olonoh, ade@bottledsoftware.com
+Adekunle Olonoh, olonoh@yahoo.com
 
 =head1 COPYRIGHT
 
@@ -184,3 +179,4 @@ Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free so
 Data::Random
 
 =cut
+

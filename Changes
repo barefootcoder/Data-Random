@@ -1,6 +1,13 @@
 Revision history for Data::Random.
 
-0.02  Mon Aug 20 2001
+0.04  Tue Feb 26 2002
+        - removed false dependency on Perl 5.005_62
+        - only load Data::Random::WordList when needed
+            (Thanks to Mark Stosberg)
+        - fixed tests so they skip appropriate tests if Date::Calc or
+            GD are not installed
+
+0.03  Mon Aug 20 2001
         - added rand_image()
 
         - used Carp::cluck() and returned undef on errors instead of
