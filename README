@@ -1,0 +1,16 @@
+This is the README file for Data::Random, a Perl module for generating random data.  You might find it helpful mostly in test programs to easily generate pseudo-realistic distributions of data.
+
+INSTALLATION:
+
+The standard perl module install process:
+
+perl Makefile.PL
+make
+make test (optional)
+make install
+
+The module also uses Date::Calc (available on CPAN)
+
+--
+
+Adekunle Olonoh <ade@bottledsoftware.com>

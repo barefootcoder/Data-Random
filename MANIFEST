@@ -1,0 +1,6 @@
+MANIFEST
+README
+Makefile.PL
+Random.pm
+Random/WordList.pm
+test.pl
