@@ -1,6 +1,13 @@
+Changes
 MANIFEST
 README
 Makefile.PL
 Random.pm
 Random/WordList.pm
-test.pl
+t/rand_chars.t
+t/rand_date.t
+t/rand_datetime.t
+t/rand_enum.t
+t/rand_set.t
+t/rand_time.t
+t/rand_words.t

@@ -1,0 +1,17 @@
+Revision history for Data::Random.
+
+0.02  Wed May 30 2001
+        - correctly made "shuffle" flag default to 1 for rand_words(),
+            rand_chars() and rand_set()  (Thanks to David Sarno)
+            
+        - fixed bug where rand_words() would sometimes return less words
+            than what's specified in "min"  (Thanks to David Sarno)
+
+        - allowed results of rand_set() to be unshuffled
+
+        - added a plethora of tests (how's one supposed to
+            accurately the test validity of random data anyway?)
+
+0.01  Tue Oct 31 2000
+        - original version
+

@@ -21,7 +21,7 @@ use FileHandle;
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
-$Data::Random::WordList::VERSION = '0.01';
+$Data::Random::WordList::VERSION = '0.02';
 
 
 ################################################################################
@@ -85,7 +85,11 @@ sub get_words {
     # Pick which lines we want
     my %rand_lines = ();
     for(my $i = 0; $i < $num; $i++) {
-        my $rand_line = int(rand($self->{'size'}));
+        my $rand_line;
+        
+        do {
+            $rand_line = int(rand($self->{'size'}));
+        } while (exists($rand_lines{$rand_line}));
 
         $rand_lines{$rand_line} = 1;
     }
@@ -165,7 +169,7 @@ Closes the filehandle associated with the word list.  It's good practice to do t
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 AUTHOR
 

@@ -2,9 +2,6 @@
 # Data::Random
 #
 # A module used to generate random data.
-#
-# Author: Adekunle Olonoh
-#   Date: October 2000
 ################################################################################
 
 
@@ -49,7 +46,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT = qw();
 
-$Data::Random::VERSION = '0.01';
+$Data::Random::VERSION = '0.02';
 
 
 ################################################################################
@@ -70,7 +67,7 @@ sub rand_words {
     # Initialize max and min vars
     $options{'min'} ||= 1;
     $options{'max'} ||= 1;
-        
+    
     # Make sure the max and min vars are OK
     die 'min value cannot be larger than max value' if $options{'min'} > $options{'max'};
     die 'min value must be a positive integer' if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
@@ -83,7 +80,7 @@ sub rand_words {
     die 'size value must be a positive integer' if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
     
     # Initialize the shuffle flag
-    $options{'shuffle'} = $options{'shuffle'} ? 1 : 0;
+    $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
     
     my $wl;
     my $close_wl = 1;
@@ -103,7 +100,7 @@ sub rand_words {
     
     # Close the word list
     $wl->close() if $close_wl;
-
+    
     # Shuffle the words around
     shuffle($rand_words) if $options{'shuffle'};
 
@@ -167,47 +164,50 @@ sub rand_set {
     # Make sure the set array was defined
     die 'set array is not defined' if !$options{'set'};
     
-    my @set = @{$options{'set'}};
-    my $set_length = scalar @set;
+    $options{'size'} = 1 unless exists($options{'min'}) || exists($options{'max'}) || exists($options{'size'});
     
     # Initialize max and min vars
     $options{'min'} ||= 0;
-    $options{'max'} ||= @set;
-
+    $options{'max'} ||= @{$options{'set'}};
+    
     # Make sure the max and min vars are OK
     die 'min value cannot be larger than max value' if $options{'min'} > $options{'max'};
     die 'min value must be a positive integer' if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
     die 'max value must be a positive integer' if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
-    
+       
     # Initialize the size var
     $options{'size'} ||= int(rand($options{'max'} - $options{'min'} + 1)) + $options{'min'};
     
     # Make sure the size var is OK
     die 'size value must be a positive integer' if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
-    die 'size value exceeds set size' if $options{'size'} > $set_length;
+    die 'size value exceeds set size' if $options{'size'} > @{$options{'set'}};
     
     # Initialize the shuffle flag
-    $options{'shuffle'} = $options{'shuffle'} ? 1 : 0;
+    $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
     
     # Get the random items
-    my @results = ();
+    my %results = ();
     for(my $i = 0; $i < $options{'size'}; $i++) {
-        my $result = int(rand($set_length));
+        my $result;
+        
+        do {
+            $result = int(rand(@{$options{'set'}}));
+        } while (exists($results{$result}));
 
-        push(@results, $set[$result]);
-        splice(@set, $result, 1);
-        $set_length--;
+        $results{$result} = 1;
     }
-
+    
+    my @results = sort { $a <=> $b } keys %results;
+    
     # Shuffle the items
     shuffle(\@results) if $options{'shuffle'};
 
     # Return an array or an array reference, depending on the context in which the sub was called
     if (wantarray()) {
-        return @results;
+        return @{$options{'set'}}[@results];
     }
     else {
-        return \@results;
+        return \@{$options{'set'}}[@results];
     }
 }
 
@@ -234,7 +234,9 @@ sub rand_date {
     my %options = @_;
     
     # use the Date::Calc module
-    use Date::Calc;
+    eval q{ use Date::Calc };
+    
+    die $@ if $@;
     
     my ($min_year, $min_month, $min_day, $max_year, $max_month, $max_day);
     
@@ -354,8 +356,10 @@ sub rand_datetime {
     my %options = @_;
     
     # use the Date::Calc module
-    use Date::Calc;
+    eval q{ use Date::Calc };
     
+    die $@ if $@;
+        
     my ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec, $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec);
     
     # Get today's date
@@ -441,7 +445,7 @@ Data::Random - Perl module to generate random data
   my $random_time = rand_time();
     
   my $random_datetime = rand_datetime();
-
+  
 
 =head1 DESCRIPTION
 
@@ -653,11 +657,16 @@ max - the maximum date/time to be returned. It should be in the form "YYYY-MM-DD
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 AUTHOR
 
 Adekunle Olonoh, ade@bottledsoftware.com
+
+=head1 CREDITS
+
+Hiroki Chalfant
+David Sarno
 
 =head1 COPYRIGHT
 
