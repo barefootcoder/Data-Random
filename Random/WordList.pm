@@ -14,11 +14,12 @@ package Data::Random::WordList;
 ################################################################################
 #require 5.005_62;
 use FileHandle;
+use File::Basename qw(dirname);
 
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
-$Data::Random::WordList::VERSION = '0.04';
+$Data::Random::WordList::VERSION = '0.05';
 
 ################################################################################
 # - Subroutines
@@ -33,6 +34,8 @@ sub new {
 
     # Check if what was passed in was a prototype reference or a class name
     my $class = ref($proto) || $proto;
+    
+    $options{'wordlist'} ||= dirname($INC{'Data/Random.pm'}).'/Random/dict';
 
     # Create a new filehandle object
     my $fh = new FileHandle $options{'wordlist'}
@@ -150,7 +153,7 @@ Returns a reference to a new Data::Random::WordList object.  Use the "wordlist" 
 
 =item *
 
-wordlist - the path to the wordlist file.
+wordlist - the path to the wordlist file.  If a path isn't supplied, the wordlist distributed with this module is used.
 
 =back 4
 
@@ -164,11 +167,11 @@ Closes the filehandle associated with the word list.  It's good practice to do t
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 AUTHOR
 
-Adekunle Olonoh, olonoh@yahoo.com
+Adekunle Olonoh, koolade@users.sourceforge.net
 
 =head1 COPYRIGHT
 

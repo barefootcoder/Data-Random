@@ -48,7 +48,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-$Data::Random::VERSION = '0.04';
+$Data::Random::VERSION = '0.05';
 
 ################################################################################
 # - Subroutines
@@ -62,12 +62,12 @@ sub rand_words {
     # Get the options hash
     my %options = @_;
 
-    # Make sure the wordlist param was specified
-    cluck('a wordlist must be specified') && return if !$options{'wordlist'};
-
     # Initialize max and min vars
     $options{'min'} ||= 1;
     $options{'max'} ||= 1;
+    
+    # Initialize the wordlist param
+    $options{'wordlist'} ||= '';
 
     # Make sure the max and min vars are OK
     cluck('min value cannot be larger than max value') && return
@@ -544,7 +544,7 @@ Data::Random - Perl module to generate random data
 
   use Data::Random qw(:all);
   
-  my @random_words = rand_words( wordlist => '/usr/dict/words', size => 10 );
+  my @random_words = rand_words( size => 10 );
     
   my @random_chars = rand_chars( set => 'all', min => 5, max => 8 );
   
@@ -579,7 +579,7 @@ This returns a list of random words given a wordlist.  See below for possible pa
 
 =item *
 
-wordlist - the path to the wordlist file.  A lot of systems have one at /usr/dict/words.  You can also optionally supply a Data::Random::WordList object to keep a persistent wordlist.
+wordlist - the path to the wordlist file.  A lot of systems have one at /usr/dict/words.  You can also optionally supply a Data::Random::WordList object to keep a persistent wordlist.  The default is the wordlist distributed with this module.
 
 =item *
 
@@ -827,11 +827,11 @@ fgcolor - the foreground color of the image.  The value must be a reference to a
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 AUTHOR
 
-Adekunle Olonoh, olonoh@yahoo.com
+Adekunle Olonoh, koolade@users.sourceforge.net
 
 =head1 CREDITS
 

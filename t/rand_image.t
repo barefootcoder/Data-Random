@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use Test::More;
 
 BEGIN { plan tests => 1 }
 
@@ -12,19 +12,22 @@ use vars qw( $imagefile );
 # Try to load GD
 eval q{ use GD };
 
-# If the module cannot be loaded, skip tests
-print "1..0 # Skipped: GD not installed\n" and exit if $@;
+SKIP: {
 
-$imagefile = File::Spec->tmpdir() . '/Data_Random_' . time() . '.tmp';
+    # If the module cannot be loaded, skip tests
+    skip('GD not installed', 1) if $@;
 
-# Test writing an image to a file
-{
-    open( FILE, ">$imagefile" );
-    binmode(FILE);
-    print FILE rand_image( bgcolor => [ 0, 0, 0 ] );
-    close(FILE);
+    $imagefile = File::Spec->tmpdir() . '/Data_Random_' . time() . '.tmp';
 
-    ok( !( -z $imagefile ) );
+    # Test writing an image to a file
+    {
+        open( FILE, ">$imagefile" );
+        binmode(FILE);
+        print FILE rand_image( bgcolor => [ 0, 0, 0 ] );
+        close(FILE);
+
+        ok( !( -z $imagefile ) );
+    }
 }
 
 END {

@@ -1,9 +1,12 @@
 Changes
 MANIFEST
 README
+README.linux.words
+README2.linux.words
 Makefile.PL
 Random.pm
 Random/WordList.pm
+Random/dict
 t/rand_chars.t
 t/rand_date.t
 t/rand_datetime.t

@@ -1,5 +1,10 @@
 Revision history for Data::Random.
 
+0.05  Thu Feb 20 2003
+        - added default wordlist (copy of linux.words)
+        - fixed tests again so they don't fail if Date::Calc or
+            GD are not installed
+
 0.04  Tue Feb 26 2002
         - removed false dependency on Perl 5.005_62
         - only load Data::Random::WordList when needed

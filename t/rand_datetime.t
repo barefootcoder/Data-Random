@@ -1,5 +1,5 @@
 use strict;
-use Test;
+use Test::More;
 
 BEGIN { plan tests => 5 }
 
@@ -9,137 +9,140 @@ use Data::Random qw( rand_datetime );
 # Try to load Date::Calc 
 eval q{ use Date::Calc };
 
-# If the module cannot be loaded, skip tests
-print "1..0 # Skipped: Date::Calc not installed\n" and exit if $@;
+SKIP: {
 
-# Get today's date
-my ( $year, $month, $day ) = Date::Calc::Today();
+    # If the module cannot be loaded, skip tests
+    skip('Date::Calc not installed', 5) if $@;
 
-# Test default w/ no params -- should return a date between today and 1 year from now
-{
-    my $pass = 1;
+    # Get today's date
+    my ( $year, $month, $day ) = Date::Calc::Today();
 
-    my $max_days =
-      Date::Calc::Delta_Days( $year, $month, $day,
-        Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
+    # Test default w/ no params -- should return a date between today and 1 year from now
+    {
+        my $pass = 1;
 
-    my $i = 0;
-    while ( $pass && $i < $max_days ) {
-        my $date = rand_datetime();
-
-        my $delta =
+        my $max_days =
           Date::Calc::Delta_Days( $year, $month, $day,
-            ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
 
-        $pass = 0
-          unless $delta >= 0 && $delta <= $max_days
-          && _to_secs( ( split ( / /, $date ) )[1] );
+        my $i = 0;
+        while ( $pass && $i < $max_days ) {
+            my $date = rand_datetime();
 
-        $i++;
+            my $delta =
+              Date::Calc::Delta_Days( $year, $month, $day,
+                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+
+            $pass = 0
+              unless $delta >= 0 && $delta <= $max_days
+              && _to_secs( ( split ( / /, $date ) )[1] );
+
+            $i++;
+        }
+
+        ok($pass);
     }
 
-    ok($pass);
-}
+    # Test min option
+    {
+        my $pass = 1;
 
-# Test min option
-{
-    my $pass = 1;
+        my $max_days = Date::Calc::Delta_Days( 1978, 9, 21, 1979, 9, 21 );
 
-    my $max_days = Date::Calc::Delta_Days( 1978, 9, 21, 1979, 9, 21 );
+        my $i = 0;
+        while ( $pass && $i < $max_days ) {
+            my $date = rand_datetime( min => '1978-9-21 4:0:0' );
 
-    my $i = 0;
-    while ( $pass && $i < $max_days ) {
-        my $date = rand_datetime( min => '1978-9-21 4:0:0' );
+            my $delta =
+              Date::Calc::Delta_Days( 1978, 9, 21,
+                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
 
-        my $delta =
-          Date::Calc::Delta_Days( 1978, 9, 21,
-            ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+            $pass = 0
+              unless $delta >= 0 && $delta <= $max_days
+              && _to_secs( ( split ( / /, $date ) )[1] );
 
-        $pass = 0
-          unless $delta >= 0 && $delta <= $max_days
-          && _to_secs( ( split ( / /, $date ) )[1] );
+            $i++;
+        }
 
-        $i++;
+        ok($pass);
     }
 
-    ok($pass);
-}
+    # Test max option
+    {
+        my $pass = 1;
 
-# Test max option
-{
-    my $pass = 1;
-
-    my $max_days =
-      Date::Calc::Delta_Days( $year, $month, $day,
-        Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
-
-    my $i = 0;
-    while ( $pass && $i < $max_days ) {
-        my $date =
-          rand_datetime( max =>
-            join ( '-',
-                Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
-            . ' 0:0:0' );
-
-        my $delta =
+        my $max_days =
           Date::Calc::Delta_Days( $year, $month, $day,
-            ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
 
-        $pass = 0
-          unless $delta >= 0 && $delta <= $max_days
-          && _to_secs( ( split ( / /, $date ) )[1] );
+        my $i = 0;
+        while ( $pass && $i < $max_days ) {
+            my $date =
+              rand_datetime( max =>
+                join ( '-',
+                    Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
+                . ' 0:0:0' );
 
-        $i++;
+            my $delta =
+              Date::Calc::Delta_Days( $year, $month, $day,
+                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+
+            $pass = 0
+              unless $delta >= 0 && $delta <= $max_days
+              && _to_secs( ( split ( / /, $date ) )[1] );
+
+            $i++;
+        }
+
+        ok($pass);
     }
 
-    ok($pass);
-}
+    # Test min + max options
+    {
+        my $pass = 1;
 
-# Test min + max options
-{
-    my $pass = 1;
-
-    my $max_days =
-      Date::Calc::Delta_Days( $year, $month, $day,
-        Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
-
-    my $i = 0;
-    while ( $pass && $i < $max_days ) {
-        my $date = rand_datetime(
-            min => "$year-$month-$day 12:0:0",
-            max =>
-            join ( '-',
-                Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
-            . ' 12:0:0'
-        );
-
-        my $delta =
+        my $max_days =
           Date::Calc::Delta_Days( $year, $month, $day,
-            ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
 
-        $pass = 0
-          unless $delta >= 0 && $delta <= $max_days
-          && _to_secs( ( split ( / /, $date ) )[1] );
+        my $i = 0;
+        while ( $pass && $i < $max_days ) {
+            my $date = rand_datetime(
+                min => "$year-$month-$day 12:0:0",
+                max =>
+                join ( '-',
+                    Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
+                . ' 12:0:0'
+            );
 
-        $i++;
+            my $delta =
+              Date::Calc::Delta_Days( $year, $month, $day,
+                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
+
+            $pass = 0
+              unless $delta >= 0 && $delta <= $max_days
+              && _to_secs( ( split ( / /, $date ) )[1] );
+
+            $i++;
+        }
+
+        ok($pass);
     }
 
-    ok($pass);
-}
+    # Test min + max options using "now"
+    {
+        my $pass = 1;
 
-# Test min + max options using "now"
-{
-    my $pass = 1;
+        my $date = rand_datetime( min => 'now', max => 'now' );
 
-    my $date = rand_datetime( min => 'now', max => 'now' );
+        my ( $new_year, $new_month, $new_day ) = ( $date =~ /^(\d+)-(\d+)-(\d+)/ );
 
-    my ( $new_year, $new_month, $new_day ) = ( $date =~ /^(\d+)-(\d+)-(\d+)/ );
+        $pass = 0
+          unless $new_year == $year && $new_month == $month && $new_day == $day
+          && _to_secs( ( split ( / /, $date ) )[1] );
 
-    $pass = 0
-      unless $new_year == $year && $new_month == $month && $new_day == $day
-      && _to_secs( ( split ( / /, $date ) )[1] );
-
-    ok($pass);
+        ok($pass);
+    }
 }
 
 sub _to_secs {
