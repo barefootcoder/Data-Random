@@ -9,7 +9,7 @@ make
 make test (optional)
 make install
 
-The module also uses Date::Calc (available on CPAN)
+The module also uses Date::Calc for rand_date() and rand_datetime(), and GD for rand_image()  (both available on CPAN)
 
 --
 

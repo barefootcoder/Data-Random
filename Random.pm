@@ -14,6 +14,7 @@ package Data::Random;
 require 5.005_62;
 
 use lib qw(..);
+use Carp qw(cluck);
 use Data::Random::WordList;
 
 require Exporter;
@@ -40,13 +41,14 @@ use vars qw(
         rand_date
         rand_time
         rand_datetime
+        rand_image
     ) ]
 );
 
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT = qw();
 
-$Data::Random::VERSION = '0.02';
+$Data::Random::VERSION = '0.03';
 
 
 ################################################################################
@@ -62,22 +64,22 @@ sub rand_words {
     my %options = @_;
     
     # Make sure the wordlist param was specified
-    die 'a wordlist must be specified' if !$options{'wordlist'};
+    cluck('a wordlist must be specified') && return if !$options{'wordlist'};
     
     # Initialize max and min vars
     $options{'min'} ||= 1;
     $options{'max'} ||= 1;
     
     # Make sure the max and min vars are OK
-    die 'min value cannot be larger than max value' if $options{'min'} > $options{'max'};
-    die 'min value must be a positive integer' if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
-    die 'max value must be a positive integer' if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
+    cluck('min value cannot be larger than max value') && return if $options{'min'} > $options{'max'};
+    cluck('min value must be a positive integer') && return if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
+    cluck('max value must be a positive integer') && return if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
     
     # Initialize the size var
     $options{'size'} ||= int(rand($options{'max'} - $options{'min'} + 1)) + $options{'min'};
     
     # Make sure the size var is OK
-    die 'size value must be a positive integer' if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
+    cluck('size value must be a positive integer') && return if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
     
     # Initialize the shuffle flag
     $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
@@ -162,7 +164,7 @@ sub rand_set {
     my %options = @_;
     
     # Make sure the set array was defined
-    die 'set array is not defined' if !$options{'set'};
+    cluck('set array is not defined') && return if !$options{'set'};
     
     $options{'size'} = 1 unless exists($options{'min'}) || exists($options{'max'}) || exists($options{'size'});
     
@@ -171,16 +173,16 @@ sub rand_set {
     $options{'max'} ||= @{$options{'set'}};
     
     # Make sure the max and min vars are OK
-    die 'min value cannot be larger than max value' if $options{'min'} > $options{'max'};
-    die 'min value must be a positive integer' if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
-    die 'max value must be a positive integer' if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
+    cluck('min value cannot be larger than max value') && return if $options{'min'} > $options{'max'};
+    cluck('min value must be a positive integer') && return if $options{'min'} < 0 || $options{'min'} != int($options{'min'});
+    cluck('max value must be a positive integer') && return if $options{'max'} < 0 || $options{'max'} != int($options{'max'});
        
     # Initialize the size var
     $options{'size'} ||= int(rand($options{'max'} - $options{'min'} + 1)) + $options{'min'};
     
     # Make sure the size var is OK
-    die 'size value must be a positive integer' if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
-    die 'size value exceeds set size' if $options{'size'} > @{$options{'set'}};
+    cluck('size value must be a positive integer') && return if $options{'size'} < 0 || $options{'size'} != int($options{'size'});
+    cluck('size value exceeds set size') && return if $options{'size'} > @{$options{'set'}};
     
     # Initialize the shuffle flag
     $options{'shuffle'} = exists($options{'shuffle'}) ? $options{'shuffle'} : 1;
@@ -220,7 +222,7 @@ sub rand_enum {
     my %options = @_;
     
     # Make sure the set array was defined
-    die 'set array is not defined' if !$options{'set'};
+    cluck('set array is not defined') && return if !$options{'set'};
    
     return $options{'set'}->[int(rand(@{$options{'set'}}))];
 }
@@ -236,7 +238,7 @@ sub rand_date {
     # use the Date::Calc module
     eval q{ use Date::Calc };
     
-    die $@ if $@;
+    cluck($@) && return if $@;
     
     my ($min_year, $min_month, $min_day, $max_year, $max_month, $max_day);
     
@@ -272,7 +274,7 @@ sub rand_date {
         $max_year, $max_month, $max_day,
     );
     
-    die 'max date is later than min date' if $delta_days < 0;
+    cluck('max date is later than min date') && return if $delta_days < 0;
     
     $delta_days = int(rand($delta_days + 1));
     
@@ -301,9 +303,9 @@ sub rand_time {
         else {
             ($min_hour, $min_min, $min_sec) = split(/\:/, $options{'min'});
             
-            die 'minimum time is not in valid time format HH:MM:SS' if ($min_hour > 23) || ($min_hour < 0);
-            die 'minimum time is not in valid time format HH:MM:SS' if ($min_min > 59) || ($min_min < 0);
-            die 'minimum time is not in valid time format HH:MM:SS' if ($min_sec > 59) || ($min_sec < 0);
+            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_hour > 23) || ($min_hour < 0);
+            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_min > 59) || ($min_min < 0);
+            cluck('minimum time is not in valid time format HH:MM:SS') && return if ($min_sec > 59) || ($min_sec < 0);
         }
     }
     else {
@@ -320,9 +322,9 @@ sub rand_time {
         else {
             ($max_hour, $max_min, $max_sec) = split(/\:/, $options{'max'});
                 
-            die 'maximum time is not in valid time format HH:MM:SS' if ($max_hour > 23) || ($max_hour < 0);
-            die 'maximum time is not in valid time format HH:MM:SS' if ($max_min > 59) || ($max_min < 0);
-            die 'maximum time is not in valid time format HH:MM:SS' if ($max_sec > 59) || ($max_sec < 0);
+            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_hour > 23) || ($max_hour < 0);
+            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_min > 59) || ($max_min < 0);
+            cluck('maximum time is not in valid time format HH:MM:SS') && return if ($max_sec > 59) || ($max_sec < 0);
         }
     }
     else {
@@ -334,7 +336,7 @@ sub rand_time {
     
     my $delta_secs = $max_secs - $min_secs;
     
-    die 'min time is later than max time' if $delta_secs < 0;
+    cluck('min time is later than max time') && return if $delta_secs < 0;
     
     $delta_secs = int(rand($delta_secs + 1));
     
@@ -358,7 +360,7 @@ sub rand_datetime {
     # use the Date::Calc module
     eval q{ use Date::Calc };
     
-    die $@ if $@;
+    cluck($@) && return if $@;
         
     my ($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec, $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec);
     
@@ -394,7 +396,7 @@ sub rand_datetime {
         $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec,
     );
        
-    die 'max date is later than min date' if ($delta_days < 0) || ($delta_hours < 0) || ($delta_mins < 0) || ($delta_secs < 0);
+    cluck('max date is later than min date') && return if ($delta_days < 0) || ($delta_hours < 0) || ($delta_mins < 0) || ($delta_secs < 0);
     
     $delta_secs = ($delta_days * 86400) + ($delta_hours * 3600) + ($delta_mins * 60) + $delta_secs;
     
@@ -403,6 +405,54 @@ sub rand_datetime {
     ($year, $month, $day, $hour, $min, $sec) = Date::Calc::Add_Delta_DHMS($min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec, 0, 0, 0, $delta_secs);
     
     return sprintf("%04u-%02u-%02u %02u:%02u:%02u", $year, $month, $day, $hour, $min, $sec);
+}
+
+
+################################################################################
+# rand_image()
+################################################################################
+sub rand_image {
+    # Get the options hash
+    my %options = @_;
+    
+    $options{'minwidth'} ||= 1;
+    $options{'maxwidth'} ||= 100;
+    $options{'width'}    ||= int(rand($options{'maxwidth'} - $options{'minwidth'} + 1)) + $options{'minwidth'};
+    
+    $options{'minheight'} ||= 1;
+    $options{'maxheight'} ||= 100;
+    $options{'height'}    ||= int(rand($options{'maxheight'} - $options{'minheight'} + 1)) + $options{'minheight'};
+
+    $options{'minpixels'} ||= 0;
+    $options{'maxpixels'} ||= $options{'width'} * $options{'height'};
+    $options{'pixels'}    ||= int(rand($options{'maxpixels'} - $options{'minpixels'} + 1)) + $options{'minpixels'};
+    
+    $options{'bgcolor'} ||= _color();
+    $options{'fgcolor'} ||= _color();
+    
+    eval q{ use GD; };
+    
+    cluck($@) && return if $@;
+    
+    my $image = new GD::Image($options{'width'}, $options{'height'});
+    
+    my $bgcolor = $image->colorAllocate(@{$options{'bgcolor'}});
+    my $fgcolor = $image->colorAllocate(@{$options{'fgcolor'}});
+    
+    $image->rectangle(0, 0, $options{'width'}, $options{'height'}, $bgcolor);
+    
+    for(my $i = 0; $i < $options{'pixels'}; $i++) {
+        my $x = int(rand($options{'width'} + 1));
+        my $y = int(rand($options{'height'} + 1));
+            
+        $image->setPixel($x, $y, $fgcolor);
+    }
+    
+    return $image->png();
+    
+    sub _color {
+        return [ int(rand(266)), int(rand(266)), int(rand(266)) ];
+    }
 }
 
 
@@ -445,6 +495,11 @@ Data::Random - Perl module to generate random data
   my $random_time = rand_time();
     
   my $random_datetime = rand_datetime();
+  
+  open(FILE, ">rand_image.png") or die $!;
+  binmode(FILE);
+  print FILE rand_image( bgcolor => [0, 0, 0] );
+  close(FILE);
   
 
 =head1 DESCRIPTION
@@ -655,9 +710,62 @@ max - the maximum date/time to be returned. It should be in the form "YYYY-MM-DD
 =back 4
 
 
+=head2 rand_image()
+
+This returns a random image.  Currently only PNG images are supported.  See below for possible parameters.
+
+=over 4
+
+=item *
+
+minwidth - the minimum width of the image.  The default is 1.
+
+=item *
+
+maxwidth - the maximum width of the image.  The default is 100.
+
+=item *
+
+width - the width of the image.  If you supply a value for 'width', then 'minwidth' and 'maxwidth' aren't paid attention to.
+
+=item *
+
+minheight - the minimum height of the image.  The default is 1.
+
+=item *
+
+maxheight - the maximum height of the image.  The default is 100.
+
+=item *
+
+height - the height of the image.  If you supply a value for 'width', then 'minwidth' and 'maxwidth' aren't paid attention to.
+
+=item *
+
+minpixels - the minimum number of random pixels to display on the image.  The default is 0.
+
+=item *
+
+maxpixels - the maximum number of random pixels to display on the image.  The default is width * height.
+
+=item *
+
+pixels - the number of random pixels to display on the image.  If you supply a value for 'pixels', then 'minpixels' and 'maxpixels' aren't paid attention to.
+
+=item *
+
+bgcolor - the background color of the image.  The value must be a reference to an RGB array where each element is an integer between 0 and 255 (eg. [ 55, 120, 255 ]).
+
+=item *
+
+fgcolor - the foreground color of the image.  The value must be a reference to an RGB array where each element is an integer between 0 and 255 (eg. [ 55, 120, 255 ]).
+
+=back 4
+
+
 =head1 VERSION
 
-0.02
+0.03
 
 =head1 AUTHOR
 

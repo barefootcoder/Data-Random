@@ -11,3 +11,4 @@ t/rand_enum.t
 t/rand_set.t
 t/rand_time.t
 t/rand_words.t
+t/rand_image.t

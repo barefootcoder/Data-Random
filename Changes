@@ -1,5 +1,11 @@
 Revision history for Data::Random.
 
+0.02  Mon Aug 20 2001
+        - added rand_image()
+
+        - used Carp::cluck() and returned undef on errors instead of
+            calling die, thus making it a little more friendly
+
 0.02  Wed May 30 2001
         - correctly made "shuffle" flag default to 1 for rand_words(),
             rand_chars() and rand_set()  (Thanks to David Sarno)
