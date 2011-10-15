@@ -11,7 +11,6 @@ package Data::Random;
 ################################################################################
 use 5.005_62;
 
-use lib qw(..);
 use Carp qw(cluck);
 
 #use Data::Random::WordList;
