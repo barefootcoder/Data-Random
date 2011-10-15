@@ -1,5 +1,8 @@
 Revision history for Data::Random.
 
+0.05_01     Fri Oct 14 2011
+        - fixed bug where .. was added to @INC (RT/71346)
+
 0.05  Thu Feb 20 2003
         - added default wordlist (copy of linux.words)
         - fixed tests again so they don't fail if Date::Calc or
@@ -21,7 +24,7 @@ Revision history for Data::Random.
 0.02  Wed May 30 2001
         - correctly made "shuffle" flag default to 1 for rand_words(),
             rand_chars() and rand_set()  (Thanks to David Sarno)
-            
+
         - fixed bug where rand_words() would sometimes return less words
             than what's specified in "min"  (Thanks to David Sarno)
 
