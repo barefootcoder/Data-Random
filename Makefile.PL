@@ -1,8 +1,20 @@
-use ExtUtils::MakeMaker;
+use inc::Module::Install;
 
-WriteMakefile(
-    'NAME'         => 'Data::Random',
-    'VERSION_FROM' => 'Random.pm',      # finds $VERSION
-    'PMLIBDIRS'    => ['Random'],
-    'PREREQ_PM'    => {},
-);
+
+# Define metadata
+name            'Data-Random';
+all_from        'lib/Data/Random.pm';
+
+
+# Specific dependencies
+requires        'Carp'              =>  0;
+
+recommends      'Date::Calc'        =>  0;
+recommends      'GD'                =>  0;
+
+test_requires   'Test'              => 0;
+test_requires   'Test::More'        => 0;
+test_requires   'File::Spec'        => 0;
+
+
+WriteAll;
