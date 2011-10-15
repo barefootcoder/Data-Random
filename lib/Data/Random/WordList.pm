@@ -34,7 +34,7 @@ sub new {
 
     # Check if what was passed in was a prototype reference or a class name
     my $class = ref($proto) || $proto;
-    
+
     $options{'wordlist'} ||= dirname($INC{'Data/Random.pm'}).'/Random/dict';
 
     # Create a new filehandle object
@@ -126,7 +126,7 @@ Data::Random::WordList - Perl module to get random words from a word list
 =head1 SYNOPSIS
 
   use Data::Random::WordList;
-  
+
   my $wl = new Data::Random::WordList( wordlist => '/usr/dict/words' );
 
   my @rand_words = $wl->get_words(10);
@@ -175,7 +175,7 @@ Adekunle Olonoh, koolade@users.sourceforge.net
 
 =head1 COPYRIGHT
 
-Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself. 
+Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

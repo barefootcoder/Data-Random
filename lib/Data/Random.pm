@@ -65,7 +65,7 @@ sub rand_words {
     # Initialize max and min vars
     $options{'min'} ||= 1;
     $options{'max'} ||= 1;
-    
+
     # Initialize the wordlist param
     $options{'wordlist'} ||= '';
 
@@ -100,7 +100,7 @@ sub rand_words {
     else {
         require Data::Random::WordList;
 
-        # Create a new wordlist object    
+        # Create a new wordlist object
         $wl = new Data::Random::WordList( wordlist => $options{'wordlist'} );
     }
 
@@ -543,26 +543,26 @@ Data::Random - Perl module to generate random data
 =head1 SYNOPSIS
 
   use Data::Random qw(:all);
-  
+
   my @random_words = rand_words( size => 10 );
-    
+
   my @random_chars = rand_chars( set => 'all', min => 5, max => 8 );
-  
+
   my @random_set = rand_set( set => \@set, size => 5 );
-  
+
   my $random_enum = rand_enum( set => \@set );
-  
+
   my $random_date = rand_date();
-  
+
   my $random_time = rand_time();
-    
+
   my $random_datetime = rand_datetime();
-  
+
   open(FILE, ">rand_image.png") or die $!;
   binmode(FILE);
   print FILE rand_image( bgcolor => [0, 0, 0] );
   close(FILE);
-  
+
 
 =head1 DESCRIPTION
 
@@ -617,9 +617,9 @@ set - the set of characters to be used.  This value can be either a reference to
     alphanumeric - alphanumeric characters: a-z, A-Z, 0-9
     char         - non-alphanumeric characters: # ~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `
     all          - all of the above
-    
+
 =item *
-    
+
 min - the minimum number of characters to return.  The default is 0.
 
 =item *
@@ -684,17 +684,17 @@ set - the set of strings to be used.  This should be a reference to an array of 
 This returns a random date in the form "YYYY-MM-DD".  2-digit years are not currently supported.  Efforts are made to make sure you're returned a truly valid date--ie, you'll never be returned the date February 31st.  See the options below to find out how to control the date range.  Here are a few examples:
 
     # returns a date somewhere in between the current date, and one year from the current date
-    $date = rand_date();    
-    
+    $date = rand_date();
+
     # returns a date somewhere in between September 21, 1978 and September 21, 1979
     $date = rand_date( min => '1978-9-21' );
-    
+
     # returns a date somewhere in between September 21, 1978 and the current date
     $date = rand_date( min => '1978-9-21', max => 'now' );
-    
+
     # returns a date somewhere in between the current date and September 21, 2008
     $date = rand_date( min => 'now', max => '2008-9-21' );
-    
+
 See below for possible parameters.
 
 =over 4
@@ -715,18 +715,18 @@ max - the maximum date to be returned. It should be in the form "YYYY-MM-DD" or 
 This returns a random time in the form "HH:MM:SS".  24 hour times are supported.  See the options below to find out how to control the time range.  Here are a few examples:
 
     # returns a random 24-hr time (between 00:00:00 and 23:59:59)
-    $time = rand_time();    
-    
+    $time = rand_time();
+
     # returns a time somewhere in between 04:00:00 and the end of the day
     $time = rand_time( min => '4:0:0' );
-    
+
     # returns a time somewhere in between 8:00:00 and the current time (if it's after 8:00)
     $time = rand_time( min => '12:00:00', max => 'now' );
-    
+
     # returns a date somewhere in between the current time and the end of the day
     $time = rand_time( min => 'now' );
-    
-See below for possible parameters.    
+
+See below for possible parameters.
 
 =over 4
 
@@ -747,16 +747,16 @@ This returns a random date and time in the form "YYYY-MM-DD HH:MM:SS".  See the 
 
     # returns a date somewhere in between the current date/time, and one year from the current date/time
     $datetime = rand_datetime();
-    
+
     # returns a date somewhere in between 4:00 September 21, 1978 and 4:00 September 21, 1979
     $datetime = rand_datetime( min => '1978-9-21 4:0:0' );
-    
+
     # returns a date somewhere in between 4:00 September 21, 1978 and the current date
     $datetime = rand_datetime( min => '1978-9-21 4:0:0', max => 'now' );
-    
+
     # returns a date somewhere in between the current date/time and the end of the day September 21, 2008
     $datetime = rand_datetime( min => 'now', max => '2008-9-21 23:59:59' );
-    
+
 See below for possible parameters.
 
 =over 4
@@ -840,7 +840,7 @@ David Sarno
 
 =head1 COPYRIGHT
 
-Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself. 
+Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
