@@ -110,7 +110,7 @@ sub rand_words {
     $wl->close() if $close_wl;
 
     # Shuffle the words around
-    shuffle($rand_words) if $options{'shuffle'};
+    _shuffle($rand_words) if $options{'shuffle'};
 
 # Return an array or an array reference, depending on the context in which the sub was called
     if ( wantarray() ) {
@@ -223,7 +223,7 @@ sub rand_set {
     my @results = sort { $a <=> $b } keys %results;
 
     # Shuffle the items
-    shuffle( \@results ) if $options{'shuffle'};
+    _shuffle( \@results ) if $options{'shuffle'};
 
 # Return an array or an array reference, depending on the context in which the sub was called
     if ( wantarray() ) {
@@ -520,9 +520,9 @@ sub rand_image {
 }
 
 ################################################################################
-# shuffle()
+# _shuffle()
 ################################################################################
-sub shuffle {
+sub _shuffle {
     my $array = shift;
 
     for ( my $i = @$array - 1 ; $i >= 0 ; $i-- ) {
@@ -533,6 +533,8 @@ sub shuffle {
 }
 
 1;
+
+
 
 =head1 NAME
 
@@ -596,7 +598,7 @@ size - the number of words to return.  The default is 1.  If you supply a value 
 
 shuffle - whether or not the words should be randomly shuffled.  Set this to 0 if you don't want the words shuffled.  The default is 1.  Random::Data::WordList returns words in the order that they're viewed in the word list file, so shuffling will make sure that the results are a little more random.
 
-=back 4
+=back
 
 
 =head2 rand_chars()
@@ -633,7 +635,7 @@ size - the number of characters to return.  The default is 1.  If you supply a v
 
 shuffle - whether or not the characters should be randomly shuffled.  Set this to 0 if you want the characters to stay in the order received.  The default is 1.
 
-=back 4
+=back
 
 
 =head2 rand_set()
@@ -662,7 +664,7 @@ size - the number of strings to return.  The default is 1.  If you supply a valu
 
 shuffle - whether or not the strings should be randomly shuffled.  Set this to 0 if you want the strings to stay in the order received.  The default is 1.
 
-=back 4
+=back
 
 
 =head2 rand_enum()
@@ -675,7 +677,7 @@ This returns a random element given an initial set.  See below for possible para
 
 set - the set of strings to be used.  This should be a reference to an array of strings.
 
-=back 4
+=back
 
 
 =head2 rand_date()
@@ -706,7 +708,7 @@ min - the minimum date to be returned. It should be in the form "YYYY-MM-DD" or 
 
 max - the maximum date to be returned. It should be in the form "YYYY-MM-DD" or you can alternatively use the string "now" to represent the current date.  The default is one year from the minimum date;
 
-=back 4
+=back
 
 
 =head2 rand_time()
@@ -737,7 +739,7 @@ min - the minimum time to be returned. It should be in the form "HH:MM:SS" or yo
 
 max - the maximum time to be returned. It should be in the form "HH:MM:SS" or you can alternatively use the string "now" to represent the current time.  The default is 23:59:59;
 
-=back 4
+=back
 
 
 =head2 rand_datetime()
@@ -768,7 +770,7 @@ min - the minimum date/time to be returned. It should be in the form "YYYY-MM-DD
 
 max - the maximum date/time to be returned. It should be in the form "YYYY-MM-DD HH:MM:SS" or you can alternatively use the string "now" to represent the current date/time.  The default is one year from the minimum date/time;
 
-=back 4
+=back
 
 
 =head2 rand_image()
@@ -821,7 +823,7 @@ bgcolor - the background color of the image.  The value must be a reference to a
 
 fgcolor - the foreground color of the image.  The value must be a reference to an RGB array where each element is an integer between 0 and 255 (eg. [ 55, 120, 255 ]).
 
-=back 4
+=back
 
 
 =head1 VERSION
@@ -834,8 +836,13 @@ Adekunle Olonoh, koolade@users.sourceforge.net
 
 =head1 CREDITS
 
-Hiroki Chalfant
-David Sarno
+=over 4
+
+=item * Hiroki Chalfant
+
+=item * David Sarno
+
+=back
 
 =head1 COPYRIGHT
 

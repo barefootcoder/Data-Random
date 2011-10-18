@@ -155,7 +155,7 @@ Returns a reference to a new Data::Random::WordList object.  Use the "wordlist" 
 
 wordlist - the path to the wordlist file.  If a path isn't supplied, the wordlist distributed with this module is used.
 
-=back 4
+=back
 
 =head2 get_words([NUM])
 
