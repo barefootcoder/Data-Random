@@ -1,5 +1,8 @@
 Revision history for Data::Random.
 
+0.05_02     Mon Oct 17 2011
+        - fixed packaging bug where inc/ dir was not in tarball
+
 0.05_01     Fri Oct 14 2011
         - fixed bug where .. was added to @INC (RT/71346)
 

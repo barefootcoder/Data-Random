@@ -5,4 +5,3 @@ bench.t
 .*\.swp
 blib/
 .git/
-inc/
