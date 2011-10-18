@@ -119,9 +119,12 @@ sub get_words {
 
 1;
 
+
+
 =head1 NAME
 
 Data::Random::WordList - Perl module to get random words from a word list
+
 
 =head1 SYNOPSIS
 
@@ -133,6 +136,7 @@ Data::Random::WordList - Perl module to get random words from a word list
 
   $wl->close();
 
+
 =head1 DESCRIPTION
 
 Data::Random::WordList is a module that manages a file containing a list of words.
@@ -142,6 +146,7 @@ The module expects each line of the word list file to contain only one word.  It
 The module uses a persistent filehandle so that there isn't a lot of overhead every time you want to fetch a list of random words.  However, it's much more efficient to grab multiple words at a time than it is to fetch one word at a time multiple times.
 
 The module also refrains from reading the whole file into memory, so it can be safer to use with larger files.
+
 
 =head1 METHODS
 
@@ -165,21 +170,27 @@ NUM contains the number of words you want from the wordlist.  NUM defaults to 1 
 
 Closes the filehandle associated with the word list.  It's good practice to do this every time you're done with the word list.
 
+
 =head1 VERSION
 
 0.05
 
+
 =head1 AUTHOR
 
-Adekunle Olonoh, koolade@users.sourceforge.net
+Originally written by: Adekunle Olonoh
+
+Currently maintained by: Buddy Burden (barefoot@cpan.org), starting with version 0.05_01
+
 
 =head1 COPYRIGHT
 
-Copyright (c) 2000 Adekunle Olonoh. All rights reserved. This program is free software; you can redistribute it and/or modify it under the same terms as Perl itself.
+Copyright (c) 2000-2011 Adekunle Olonoh.  All rights reserved.  This program is free software; you
+can redistribute it and/or modify it under the same terms as Perl itself.
+
 
 =head1 SEE ALSO
 
-Data::Random
+L<Data::Random>
 
 =cut
-
