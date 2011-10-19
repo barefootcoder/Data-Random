@@ -1,5 +1,9 @@
 Revision history for Data::Random.
 
+0.05_03		Wed Oct 19 2011
+		- fixed rand_time test file, which was causing intermittent
+			failures in CPAN Tester reports
+
 0.05_02     Mon Oct 17 2011
         - fixed packaging bug where inc/ dir was not in tarball
         - tweaked POD

@@ -25,3 +25,5 @@ t/rand_image.t
 t/rand_set.t
 t/rand_time.t
 t/rand_words.t
+t/z0_pod.t
+t/z1_pod-coverage.t
