@@ -13,6 +13,8 @@ lib/Data/Random/WordList.pm
 Makefile.PL
 MANIFEST
 META.yml
+MYMETA.json
+MYMETA.yml
 README
 README.linux.words
 README2.linux.words
