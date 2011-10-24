@@ -13,7 +13,7 @@ recommends      'Date::Calc'        =>  0;
 recommends      'GD'                =>  0;
 
 test_requires   'Test'              => 0;
-test_requires   'Test::More'        => 0;
+test_requires   'Test::More'        => '0.88';
 test_requires   'File::Spec'        => 0;
 
 
