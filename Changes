@@ -1,5 +1,9 @@
 Revision history for Data::Random.
 
+0.05_05     Sun Nov  6 18:11:07 PST 2011
+        - turned giant loop of ok()s into one big ok()
+            (should help with out of memory errors from CPAN Testers)
+
 0.05_04     Mon Oct 24 01:04:55 PDT 2011
         - fixed required version of Test::More, which was causing
             TAP parsing failures in CPAN Tester reports
