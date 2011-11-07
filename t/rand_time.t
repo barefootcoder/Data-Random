@@ -53,13 +53,22 @@ sub test_range
     my $num_tests = $max_secs - $min_secs + 1;
     $num_tests *= $ENV{AUTOMATED_TESTING} ? 10 : .5;
 
-    for ( 1..$num_tests ) {
+    my $num_errors = 0;
+    my $test_name = "all randomly generated values within range";
+    for ( 1..$num_tests )
+    {
         my $time = rand_time(@args);
         my $secs = _to_secs($time);
 
-        ok(defined $secs && $min_secs <= $secs && $secs <= $max_secs, "random time within range")
-                or diag "time out of range: $time";
+        unless (defined $secs && $min_secs <= $secs && $secs <= $max_secs)
+        {
+            fail($test_name);
+            diag "time out of range: $time";
+            ++$num_errors;
+        }
     }
+
+    pass($test_name) unless $num_errors;
 }
 
 
