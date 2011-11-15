@@ -19,7 +19,7 @@ use File::Basename qw(dirname);
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
-$Data::Random::WordList::VERSION = '0.05_05';
+$Data::Random::WordList::VERSION = '0.06';
 
 ################################################################################
 # - Subroutines
@@ -173,14 +173,14 @@ Closes the filehandle associated with the word list.  It's good practice to do t
 
 =head1 VERSION
 
-0.05
+0.06
 
 
 =head1 AUTHOR
 
 Originally written by: Adekunle Olonoh
 
-Currently maintained by: Buddy Burden (barefoot@cpan.org), starting with version 0.05_01
+Currently maintained by: Buddy Burden (barefoot@cpan.org), starting with version 0.06
 
 
 =head1 COPYRIGHT
