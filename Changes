@@ -1,7 +1,8 @@
+
 Revision history for Data::Random.
 
-0.06_01	Mon Jan  2 15:29:40 PST 2012
-		- fixed distro bug (RT/73551)
+0.06_02	Thu May 31 15:33:10 PDT 2012
+		- fixed distro bugs (RT/73551, RT/75507, RT/77290)
 
 0.06    Mon Nov 14 20:23:22 PST 2011
         - fixed bug where .. was added to @INC (RT/71346)

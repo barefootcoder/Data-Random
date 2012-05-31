@@ -16,6 +16,8 @@ test_requires   'Test'              => 0;
 test_requires   'Test::More'        => '0.88';
 test_requires   'File::Spec'        => 0;
 
+configure_requires 'YAML::Tiny'		=> 0;
+
 githubmeta;
 jsonmeta;
 realclean_files 'META.json';
