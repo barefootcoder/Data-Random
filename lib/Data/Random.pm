@@ -47,7 +47,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-$Data::Random::VERSION = '0.06_02';
+$Data::Random::VERSION = '0.07';
 
 ################################################################################
 # - Subroutines
@@ -828,7 +828,7 @@ fgcolor - the foreground color of the image.  The value must be a reference to a
 
 =head1 VERSION
 
-0.06_02
+0.07
 
 
 =head1 AUTHOR
