@@ -1,6 +1,9 @@
 
 Revision history for Data::Random.
 
+0.07_001	Thu Sep 13 01:29:20 PDT 2012
+		- fixing even more random tests that fail on midnight and zero seconds
+
 0.07 	Sat Jun  2 16:44:53 PDT 2012
 		- fixed distro bugs (RT/73551, RT/75507, RT/77290)
 

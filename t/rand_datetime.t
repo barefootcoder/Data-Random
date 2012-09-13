@@ -35,7 +35,7 @@ SKIP: {
 
             $pass = 0
               unless $delta >= 0 && $delta <= $max_days
-              && _to_secs( ( split ( / /, $date ) )[1] );
+              && defined _to_secs( ( split ( / /, $date ) )[1] );
 
             $i++;
         }
@@ -59,7 +59,7 @@ SKIP: {
 
             $pass = 0
               unless $delta >= 0 && $delta <= $max_days
-              && _to_secs( ( split ( / /, $date ) )[1] );
+              && defined _to_secs( ( split ( / /, $date ) )[1] );
 
             $i++;
         }
@@ -89,7 +89,7 @@ SKIP: {
 
             $pass = 0
               unless $delta >= 0 && $delta <= $max_days
-              && _to_secs( ( split ( / /, $date ) )[1] );
+              && defined _to_secs( ( split ( / /, $date ) )[1] );
 
             $i++;
         }
@@ -121,7 +121,7 @@ SKIP: {
 
             $pass = 0
               unless $delta >= 0 && $delta <= $max_days
-              && _to_secs( ( split ( / /, $date ) )[1] );
+              && defined _to_secs( ( split ( / /, $date ) )[1] );
 
             $i++;
         }
@@ -139,7 +139,7 @@ SKIP: {
 
         $pass = 0
           unless $new_year == $year && $new_month == $month && $new_day == $day
-          && _to_secs( ( split ( / /, $date ) )[1] );
+          && defined _to_secs( ( split ( / /, $date ) )[1] );
 
         ok($pass);
     }
@@ -150,9 +150,9 @@ sub _to_secs {
 
     my ( $hour, $min, $sec ) = split ( /\:/, $time );
 
-    return if ( $hour > 23 ) || ( $hour < 0 );
-    return if ( $min > 59 )  || ( $min < 0 );
-    return if ( $sec > 59 )  || ( $sec < 0 );
+    return undef if ( $hour > 23 ) || ( $hour < 0 );
+    return undef if ( $min > 59 )  || ( $min < 0 );
+    return undef if ( $sec > 59 )  || ( $sec < 0 );
 
     return $hour * 3600 + $min * 60 + $sec;
 }
