@@ -1,5 +1,4 @@
 Changes
-Data-Random-0.07_001.tar.gz
 inc/Module/Install.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -16,7 +15,6 @@ lib/Data/Random/WordList.pm
 Makefile.PL
 MANIFEST
 META.json
-META.yml
 MYMETA.json
 MYMETA.yml
 README

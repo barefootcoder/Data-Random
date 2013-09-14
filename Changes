@@ -1,6 +1,10 @@
 
 Revision history for Data::Random.
 
+0.09	Sat Sep 14 00:06:55 PDT 2013
+		- getting new Module::Install::GithubMeta (RT/88089)
+		- remove some spurious files from MANIFEST
+
 0.08	Mon Sep 17 22:57:33 PDT 2012
 		- fixing even more random tests that fail on midnight and zero seconds
 

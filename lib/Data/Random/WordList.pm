@@ -19,7 +19,7 @@ use File::Basename qw(dirname);
 ################################################################################
 # - Global Constants and Variables
 ################################################################################
-$Data::Random::WordList::VERSION = '0.08';
+$Data::Random::WordList::VERSION = '0.09';
 
 ################################################################################
 # - Subroutines
@@ -173,7 +173,7 @@ Closes the filehandle associated with the word list.  It's good practice to do t
 
 =head1 VERSION
 
-0.08
+0.09
 
 
 =head1 AUTHOR
