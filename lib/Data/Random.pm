@@ -47,7 +47,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-$Data::Random::VERSION = '0.09';
+$Data::Random::VERSION = '0.10';
 
 ################################################################################
 # - Subroutines
@@ -128,6 +128,7 @@ sub rand_chars {
 
     # Get the options hash
     my %options = @_;
+    my @chars;
 
     # Build named character sets if one wasn't supplied
     if ( ref( $options{'set'} ) ne 'ARRAY' ) {
@@ -164,7 +165,8 @@ sub rand_chars {
         $options{'set'} = \@charset;
     }
 
-    return rand_set(%options);
+    @chars = rand_set(%options);
+    return wantarray ? @chars : join('', @chars);
 }
 
 ################################################################################
@@ -548,6 +550,7 @@ Data::Random - Perl module to generate random data
   my @random_words = rand_words( size => 10 );
 
   my @random_chars = rand_chars( set => 'all', min => 5, max => 8 );
+  my $string       = rand_chars( set => 'all', min => 5, max => 8 );
 
   my @random_set = rand_set( set => \@set, size => 5 );
 
@@ -603,7 +606,10 @@ shuffle - whether or not the words should be randomly shuffled.  Set this to 0 i
 
 =head2 rand_chars()
 
-This returns a list of random characters given a set of characters.  See below for possible parameters.
+When called in a list context this returns
+a list of random characters given a set of characters.
+In a scalar context it returns a string of random characters.
+See below for possible parameters.
 
 =over 4
 

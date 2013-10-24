@@ -1,6 +1,9 @@
 
 Revision history for Data::Random.
 
+0.10
+        - rand_chars() will now return a string when called in scalar context
+
 0.09	Sat Sep 14 00:06:55 PDT 2013
 		- getting new Module::Install::GithubMeta (RT/88089)
 		- remove some spurious files from MANIFEST
