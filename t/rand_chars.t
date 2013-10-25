@@ -30,6 +30,7 @@ use vars qw( %charsets );
 );
 
 my %valid_chars;
+my $string;
 
 foreach my $charset ( keys %charsets ) {
     @{ $valid_chars{$charset} }{ @{ $charsets{$charset} } } = ();
@@ -51,6 +52,11 @@ foreach my $charset ( keys %charsets ) {
               unless ( @chars == 1
                 && exists( $valid_chars{$charset}->{ $chars[0] } ) );
 
+            $string = rand_chars( set => $charsets{$charset} );
+            if (length($string) != 1 || !valid_chars($string, $charset)) {
+                $pass = 0;
+            }
+
             $i++;
         }
 
@@ -69,12 +75,21 @@ foreach my $charset ( keys %charsets ) {
 
         my $i = 0;
         while ( $pass && $i < $num_chars ) {
-            my @chars = rand_chars( set => $charset, size => $i + 1 );
+            my $expected_length = $i + 1;
+            my @chars = rand_chars( set => $charsets{$charset},
+                                   size => $expected_length);
 
-            $pass = 0 unless @chars == ( $i + 1 );
+            $pass = 0 unless @chars == $expected_length;
 
             foreach (@chars) {
                 $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
+            }
+
+            $string = rand_chars( set => $charset, size => $expected_length );
+            if (   length($string) != $expected_length
+                || !valid_chars($string, $charset))
+            {
+                $pass = 0;
             }
 
             $i++;
@@ -107,6 +122,17 @@ foreach my $charset ( keys %charsets ) {
                 $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
             }
 
+            $string = rand_chars( set => $charsets{$charset},
+                                  min => $i,
+                                  max => $num_chars
+                                );
+            if (   length($string) < $i
+                || length($string) > $num_chars
+                || !valid_chars($string, $charset))
+            {
+                $pass = 0;
+            }
+
             $i++;
         }
 
@@ -125,17 +151,29 @@ foreach my $charset ( keys %charsets ) {
 
         my $i = 0;
         while ( $pass && $i < $num_chars ) {
+            my $expected_length = $i + 1;
             my @chars = rand_chars(
                 set  => $charsets{$charset},
-                size => $i + 1,
+                size => $expected_length,
                 min  => $i,
                 max  => $num_chars
             );
 
-            $pass = 0 unless @chars == ( $i + 1 );
+            $pass = 0 unless @chars == $expected_length;
 
             foreach (@chars) {
                 $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
+            }
+
+            $string = rand_chars( set  => $charsets{$charset},
+                                  size => $i + 1,
+                                  min  => $i,
+                                  max  => $num_chars
+                                );
+            if (   length($string) != $expected_length
+                || !valid_chars($string, $charset))
+            {
+                $pass = 0;
             }
 
             $i++;
@@ -169,16 +207,33 @@ foreach my $charset ( keys %charsets ) {
 
         my $i = 0;
         while ( $pass && $i < $num_chars ) {
+            my $expected_length = 2;
             my @chars =
-              rand_chars( set => $charsets{$charset}, size => 2, shuffle => 0 );
+              rand_chars( set     => $charsets{$charset},
+                          size    => $expected_length,
+                          shuffle => 0 );
 
             $pass = 0
-              unless ( @chars == 2
+              unless ( @chars == $expected_length
                 && _get_index( $charset, $chars[0] ) <
                 _get_index( $charset, $chars[1] ) );
 
             foreach (@chars) {
                 $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
+            }
+
+            $string = rand_chars( set     => $charsets{$charset},
+                                  size    => $expected_length,
+                                  shuffle => 0,
+                                );
+            if (   length($string) != $expected_length
+                || !valid_chars($string, $charset)
+                || (  _get_index($charset, substr($string, 0, 1))
+                    > _get_index($charset, substr($string, 1, 1))
+                   )
+               )
+            {
+                $pass = 0;
             }
 
             $i++;
@@ -187,4 +242,16 @@ foreach my $charset ( keys %charsets ) {
     }
 
     ok($pass);
+}
+
+sub valid_chars
+{
+    my $string  = shift;
+    my $charset = shift;
+
+    foreach my $char (split('', $string)) {
+        return 0 if !exists($valid_chars{$charset}{$char});
+    }
+
+    return 1;
 }
