@@ -102,7 +102,7 @@ sub rand_words {
         require Data::Random::WordList;
 
         # Create a new wordlist object
-        $wl = new Data::Random::WordList( wordlist => $options{'wordlist'} );
+        $wl = Data::Random::WordList->new( wordlist => $options{'wordlist'} );
     }
 
     # Get the random words
@@ -426,6 +426,9 @@ sub rand_image {
     # Get the options hash
     my %options = @_;
 
+    eval q{ require GD; };
+    cluck($@) && return if $@;
+
     $options{'minwidth'} ||= 1;
     $options{'maxwidth'} ||= 100;
     $options{'width'} ||=
@@ -447,11 +450,7 @@ sub rand_image {
     $options{'bgcolor'} ||= _color();
     $options{'fgcolor'} ||= _color();
 
-    eval q{ use GD; };
-
-    cluck($@) && return if $@;
-
-    my $image = new GD::Image( $options{'width'}, $options{'height'} );
+    my $image = GD::Image->new( $options{'width'}, $options{'height'} );
 
     my $bgcolor = $image->colorAllocate( @{ $options{'bgcolor'} } );
     my $fgcolor = $image->colorAllocate( @{ $options{'fgcolor'} } );
@@ -513,10 +512,10 @@ Data::Random - Perl module to generate random data
 
   my $random_datetime = rand_datetime();
 
-  open(FILE, ">rand_image.png") or die $!;
-  binmode(FILE);
-  print FILE rand_image( bgcolor => [0, 0, 0] );
-  close(FILE);
+  open(my $file, ">", "rand_image.png") or die $!;
+  binmode($file);
+  print $file rand_image( bgcolor => [0, 0, 0] );
+  close($file);
 
 
 =head1 DESCRIPTION

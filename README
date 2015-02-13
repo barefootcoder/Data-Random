@@ -9,7 +9,9 @@ make
 make test (optional)
 make install
 
-The module also uses Date::Calc for rand_date() and rand_datetime(), and GD for rand_image()  (both available on CPAN)
+The module also the module Time::Piece for rand_date() and rand_datetime()
+and GD for rand_image(). Both are available on CPAN. Time::Piece is included
+in core Perl 5.10.0 and up.
 
 --
 
