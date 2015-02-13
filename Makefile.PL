@@ -8,8 +8,8 @@ all_from        'lib/Data/Random.pm';
 
 # Specific dependencies
 requires        'Carp'              =>  0;
+requires        'Time::Piece'       =>  0;
 
-recommends      'Date::Calc'        =>  0;
 recommends      'GD'                =>  0;
 
 test_requires   'Test'              => 0;

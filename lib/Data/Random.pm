@@ -9,10 +9,12 @@ package Data::Random;
 ################################################################################
 # - Modules and Libraries
 ################################################################################
+use strict;
+use warnings;
 use 5.005_62;
 
 use Carp qw(cluck);
-
+use Time::Piece;
 #use Data::Random::WordList;
 
 require Exporter;
@@ -258,56 +260,41 @@ sub rand_date {
     # Get the options hash
     my %options = @_;
 
-    # use the Date::Calc module
-    eval q{ use Date::Calc };
-
-    cluck($@) && return if $@;
-
-    my ( $min_year, $min_month, $min_day, $max_year, $max_month, $max_day );
-
+    my $min;
+    my $max;
     # Get today's date
-    my ( $year, $month, $day ) = Date::Calc::Today();
+    my $t = localtime;
+    my ( $year, $month, $day ) = split('-', $t->ymd);
+    my $today = Time::Piece->strptime($t->ymd, "%Y-%m-%d");
 
     if ( $options{'min'} ) {
         if ( $options{'min'} eq 'now' ) {
-            ( $min_year, $min_month, $min_day ) = ( $year, $month, $day );
+            $min = $today;
         }
         else {
-            ( $min_year, $min_month, $min_day ) =
-              split ( /\-/, $options{'min'} );
+            $min = Time::Piece->strptime($options{'min'}, '%Y-%m-%d');
         }
     }
     else {
-        ( $min_year, $min_month, $min_day ) = ( $year, $month, $day );
+        $min = $today;
     }
-
     if ( $options{'max'} ) {
         if ( $options{'max'} eq 'now' ) {
-            ( $max_year, $max_month, $max_day ) = ( $year, $month, $day );
+            $max = $today;
         }
         else {
-            ( $max_year, $max_month, $max_day ) =
-              split ( /\-/, $options{'max'} );
+            $max = Time::Piece->strptime($options{max}, "%Y-%m-%d");
         }
     }
     else {
-        ( $max_year, $max_month, $max_day ) =
-          Date::Calc::Add_Delta_YMD( $min_year, $min_month, $min_day, 1, 0, 0 );
+          $max = $min->add_years(1);
     }
 
-    my $delta_days =
-      Date::Calc::Delta_Days( $min_year, $min_month, $min_day, $max_year,
-        $max_month, $max_day, );
-
+    my $delta_days = int($max->julian_day) - int($min->julian_day);
     cluck('max date is later than min date') && return if $delta_days < 0;
 
-    $delta_days = int( rand( $delta_days + 1 ) );
-
-    ( $year, $month, $day ) =
-      Date::Calc::Add_Delta_Days( $min_year, $min_month, $min_day,
-        $delta_days );
-
-    return sprintf( "%04u-%02u-%02u", $year, $month, $day );
+    my $result = $min + ( 3600 * 24  * int( rand($delta_days + 1) ) );
+    return $result->ymd;
 }
 
 ################################################################################
@@ -392,79 +379,43 @@ sub rand_datetime {
     # Get the options hash
     my %options = @_;
 
-    # use the Date::Calc module
-    eval q{ use Date::Calc };
-
-    cluck($@) && return if $@;
-
-    my (
-        $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec,
-        $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec
-    );
-
     # Get today's date
-    my ( $year, $month, $day, $hour, $min, $sec ) = Date::Calc::Today_and_Now();
+    my $now = localtime;
+    my $minimum;
+    my $maximum;
 
-    if ( $options{'min'} ) {
-        if ( $options{'min'} eq 'now' ) {
-            ( $min_year, $min_month, $min_day,
-              $min_hour, $min_min,   $min_sec )
-              = ( $year, $month, $day, $hour, $min, $sec );
+    if ( $options{min} ) {
+        if ( $options{min} eq 'now' ) {
+            $minimum = $now;
         }
         else {
-            ( $min_year, $min_month, $min_day,
-              $min_hour, $min_min,   $min_sec )
-              = $options{'min'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
+            $minimum = Time::Piece->strptime($options{min}, '%Y-%m-%d %T');
         }
     }
     else {
-        ( $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec ) =
-          ( $year, $month, $day, 0, 0, 0 );
+        $minimum = $now;
     }
 
-    if ( $options{'max'} ) {
-        if ( $options{'max'} eq 'now' ) {
-            ( $max_year, $max_month, $max_day,
-              $max_hour, $max_min,   $max_sec )
-              = ( $year, $month, $day, $hour, $min, $sec );
+    if ( $options{max} ) {
+        if ( $options{max} eq 'now' ) {
+            $maximum = $now;
         }
         else {
-            ( $max_year, $max_month, $max_day,
-              $max_hour, $max_min,   $max_sec )
-              = $options{'max'} =~ /^(\d+)-(\d+)-(\d+) (\d+):(\d+):(\d+)$/;
+              $maximum = Time::Piece->strptime($options{max}, '%Y-%m-%d %T');
         }
     }
     else {
-        ( $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec ) =
-          ( Date::Calc::Add_Delta_YMD( $min_year, $min_month, $min_day, 1, 0,
-              0 ), 23, 59, 59 );
+        $maximum =  $minimum->add_years(1);
     }
 
-    my ( $delta_days, $delta_hours, $delta_mins, $delta_secs ) =
-      Date::Calc::Delta_DHMS(
-        $min_year, $min_month, $min_day, $min_hour, $min_min, $min_sec,
-        $max_year, $max_month, $max_day, $max_hour, $max_min, $max_sec,
-    );
-
-    cluck('max date is later than min date') && return
-      if ( $delta_days < 0 ) || ( $delta_hours < 0 ) || ( $delta_mins < 0 )
-      || ( $delta_secs < 0 );
-
-    $delta_secs =
-      ( $delta_days * 86400 ) + ( $delta_hours * 3600 ) + ( $delta_mins * 60 ) +
-      $delta_secs;
+    my $delta_secs = $maximum - $minimum;
+    cluck('max_date is later than min date') && return if $delta_secs < 0;
 
     $delta_secs = int( rand( $delta_secs + 1 ) );
 
-    ( $year, $month, $day, $hour, $min, $sec ) = Date::Calc::Add_Delta_DHMS(
-        $min_year, $min_month, $min_day, $min_hour,
-        $min_min,  $min_sec,   0,        0,
-        0,         $delta_secs
-    );
+    my $result = $minimum + $delta_secs;
 
-    return
-      sprintf( "%04u-%02u-%02u %02u:%02u:%02u", $year, $month, $day, $hour,
-        $min, $sec );
+    return $result->strftime('%Y-%m-%d %T');
 }
 
 ################################################################################
