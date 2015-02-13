@@ -1,158 +1,78 @@
 use strict;
+use warnings;
 use Test::More;
 
-BEGIN { plan tests => 5 }
-
-use lib qw(..);
 use Data::Random qw( rand_datetime );
+use Time::Piece;
 
-# Try to load Date::Calc 
-eval q{ use Date::Calc };
+my $today = localtime;
 
-SKIP: {
+my $min_date = Time::Piece->strptime($today->ymd, "%Y-%m-%d");
+my $max_date = $min_date->add_years(1);
 
-    # If the module cannot be loaded, skip tests
-    skip('Date::Calc not installed', 5) if $@;
+my @tests = (
+  {
+    name => 'no args',
+    args => {},
+    min  => $today->ymd . ' ' . $today->hms,
+    max  => $today->add_years(1)->ymd .' ' . $today->hms,
+  },
+  {
+    name => 'min',
+    args => {
+      min => '1979-08-02 00:00:00',
+    },
+    min => '1979-08-02 00:00:00',
+    max => '1980-08-02 23:59:59',
+  },
+  {
+    name => 'min && max',
+    args => {
+      min => '2015-3-1 19:0:0',
+      max => '2015-5-10 8:00:00',
+    },
+    min => '2015-03-01 19:00:00',
+    max => '2015-05-10 08:00:00',
+  },
+  {
+    name => 'min now',
+    args => {
+      min => 'now',
+    },
+    min => $today->ymd . ' ' . $today->hms,
+    max => $today->add_years(1)->ymd . ' ' . $today->hms,
+  },
+  {
+    name => 'max now',
+    args => {
+      min => '2014-07-11 4:00:00',
+      max => 'now',
+    },
+    min => '2014-07-11 4:00:00',
+    max => $today->ymd . ' ' . $today->hms,
+  },
+);
 
-    # Get today's date
-    my ( $year, $month, $day ) = Date::Calc::Today();
+for my $test (@tests) {
+  note "Running $test->{name}";
 
-    # Test default w/ no params -- should return a date between today and 1 year from now
-    {
-        my $pass = 1;
+  # creating Time::Piece objects from 'min' and 'max' values.
+  my $min_date = Time::Piece->strptime($test->{min},"%Y-%m-%d %T");
+  my $max_date = Time::Piece->strptime($test->{max},"%Y-%m-%d %T");
 
-        my $max_days =
-          Date::Calc::Delta_Days( $year, $month, $day,
-            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
+  for ( 0..999 ) {
+    my $rand_datetime = rand_datetime(%{$test->{args}});
+    like(
+      $rand_datetime,
+      qr/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/,
+      'rand_datetime format'
+    );
 
-        my $i = 0;
-        while ( $pass && $i < $max_days ) {
-            my $date = rand_datetime();
-
-            my $delta =
-              Date::Calc::Delta_Days( $year, $month, $day,
-                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
-
-            $pass = 0
-              unless $delta >= 0 && $delta <= $max_days
-              && defined _to_secs( ( split ( / /, $date ) )[1] );
-
-            $i++;
-        }
-
-        ok($pass);
-    }
-
-    # Test min option
-    {
-        my $pass = 1;
-
-        my $max_days = Date::Calc::Delta_Days( 1978, 9, 21, 1979, 9, 21 );
-
-        my $i = 0;
-        while ( $pass && $i < $max_days ) {
-            my $date = rand_datetime( min => '1978-9-21 4:0:0' );
-
-            my $delta =
-              Date::Calc::Delta_Days( 1978, 9, 21,
-                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
-
-            $pass = 0
-              unless $delta >= 0 && $delta <= $max_days
-              && defined _to_secs( ( split ( / /, $date ) )[1] );
-
-            $i++;
-        }
-
-        ok($pass);
-    }
-
-    # Test max option
-    {
-        my $pass = 1;
-
-        my $max_days =
-          Date::Calc::Delta_Days( $year, $month, $day,
-            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
-
-        my $i = 0;
-        while ( $pass && $i < $max_days ) {
-            my $date =
-              rand_datetime( max =>
-                join ( '-',
-                    Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
-                . ' 0:0:0' );
-
-            my $delta =
-              Date::Calc::Delta_Days( $year, $month, $day,
-                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
-
-            $pass = 0
-              unless $delta >= 0 && $delta <= $max_days
-              && defined _to_secs( ( split ( / /, $date ) )[1] );
-
-            $i++;
-        }
-
-        ok($pass);
-    }
-
-    # Test min + max options
-    {
-        my $pass = 1;
-
-        my $max_days =
-          Date::Calc::Delta_Days( $year, $month, $day,
-            Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) );
-
-        my $i = 0;
-        while ( $pass && $i < $max_days ) {
-            my $date = rand_datetime(
-                min => "$year-$month-$day 12:0:0",
-                max =>
-                join ( '-',
-                    Date::Calc::Add_Delta_YMD( $year, $month, $day, 1, 0, 0 ) )
-                . ' 12:0:0'
-            );
-
-            my $delta =
-              Date::Calc::Delta_Days( $year, $month, $day,
-                ( $date =~ /^(\d+)-(\d+)-(\d+)/ ) );
-
-            $pass = 0
-              unless $delta >= 0 && $delta <= $max_days
-              && defined _to_secs( ( split ( / /, $date ) )[1] );
-
-            $i++;
-        }
-
-        ok($pass);
-    }
-
-    # Test min + max options using "now"
-    {
-        my $pass = 1;
-
-        my $date = rand_datetime( min => 'now', max => 'now' );
-
-        my ( $new_year, $new_month, $new_day ) = ( $date =~ /^(\d+)-(\d+)-(\d+)/ );
-
-        $pass = 0
-          unless $new_year == $year && $new_month == $month && $new_day == $day
-          && defined _to_secs( ( split ( / /, $date ) )[1] );
-
-        ok($pass);
-    }
+    my $result   = Time::Piece->strptime($rand_datetime,  "%Y-%m-%d %T");
+    cmp_ok($result, '>=', $min_date, 'rand_datetime not smaller than minimum');
+    cmp_ok($result, '<=', $max_date, 'rand_datetime not bigger than maximum');
+  }
 }
 
-sub _to_secs {
-    my $time = shift;
+done_testing;
 
-    my ( $hour, $min, $sec ) = split ( /\:/, $time );
-
-    return undef if ( $hour > 23 ) || ( $hour < 0 );
-    return undef if ( $min > 59 )  || ( $min < 0 );
-    return undef if ( $sec > 59 )  || ( $sec < 0 );
-
-    return $hour * 3600 + $min * 60 + $sec;
-}
