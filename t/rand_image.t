@@ -1,13 +1,9 @@
 use strict;
+use warnings;
+
 use Test::More;
-
-BEGIN { plan tests => 1 }
-
-use lib qw(..);
 use Data::Random qw( rand_image );
-use File::Spec;
-
-use vars qw( $imagefile );
+use File::Temp;
 
 # Try to load GD
 eval q{ use GD };
@@ -17,19 +13,16 @@ SKIP: {
     # If the module cannot be loaded, skip tests
     skip('GD not installed', 1) if $@;
 
-    $imagefile = File::Spec->tmpdir() . '/Data_Random_' . time() . '.tmp';
+    my ($fh, $imagefile) = File::Temp::tempfile();
 
     # Test writing an image to a file
     {
-        open( FILE, ">$imagefile" );
-        binmode(FILE);
-        print FILE rand_image( bgcolor => [ 0, 0, 0 ] );
-        close(FILE);
+        binmode($fh);
+        print $fh rand_image( bgcolor => [ 0, 0, 0 ] );
+        close($fh);
 
         ok( !( -z $imagefile ) );
     }
 }
 
-END {
-    unlink($imagefile) if $imagefile;
-}
+done_testing;

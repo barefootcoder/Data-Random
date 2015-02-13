@@ -1,9 +1,7 @@
 use strict;
-use Test;
+use warnings;
 
-BEGIN { plan tests => 5 }
-
-use lib qw(..);
+use Test::More;
 use Data::Random qw( rand_set );
 
 use vars qw( %charsets );
@@ -179,3 +177,5 @@ foreach my $charset ( keys %charsets ) {
 
     ok($pass);
 }
+
+done_testing;
