@@ -1,9 +1,7 @@
 use strict;
-use Test;
+use warnings;
 
-BEGIN { plan tests => 5 }
-
-use lib qw(..);
+use Test::More;
 use Data::Random qw( rand_chars );
 
 use vars qw( %charsets );
@@ -255,3 +253,5 @@ sub valid_chars
 
     return 1;
 }
+
+done_testing;

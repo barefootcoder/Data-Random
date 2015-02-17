@@ -2,7 +2,6 @@ use strict;
 use warnings;
 
 use Test::More;
-
 use Data::Random qw( rand_time );
 
 
@@ -30,9 +29,7 @@ test_range('9:0:0', '10:0:0');
     ok($new_hour == $hour && $new_min == $min && $new_sec == $sec, "random time constrained to a second works");
 }
 
-
-done_testing();
-
+done_testing;
 
 
 sub test_range

@@ -1,21 +1,17 @@
 use strict;
-use Test;
+use warnings;
 
-BEGIN { plan tests => 5 }
-
-use lib qw(..);
+use Test::More;
 use Data::Random qw( rand_words );
-use File::Spec;
+use File::Temp;
 
 use vars qw( $wordlist );
 
-$wordlist = File::Spec->tmpdir() . '/Data_Random_' . time() . '.tmp';
-
-open( FILE, ">$wordlist" );
+my ($fh, $wordlist) = File::Temp::tempfile();
 foreach ( 'A' .. 'Z' ) {
-    print FILE "$_\n";
+    print $fh "$_\n";
 }
-close(FILE);
+close($fh);
 
 my %valid_words;
 @valid_words{ 'A' .. 'Z' } = ();
@@ -121,6 +117,4 @@ my $num_words = 26;
     ok($pass);
 }
 
-END {
-    unlink($wordlist);
-}
+done_testing;

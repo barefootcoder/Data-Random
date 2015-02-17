@@ -12,7 +12,9 @@ package Data::Random::WordList;
 ################################################################################
 # - Modules and Libraries
 ################################################################################
-#require 5.005_62;
+use strict;
+use warnings;
+
 use FileHandle;
 use File::Basename qw(dirname);
 

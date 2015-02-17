@@ -1,14 +1,10 @@
 use strict;
-use Test;
+use warnings;
 
-BEGIN { plan tests => 1 }
-
-use lib qw(..);
+use Test::More;
 use Data::Random qw( rand_enum );
 
-use vars qw( %charsets );
-
-%charsets = (
+my %charsets = (
     a => [],
     b => ['A'],
     c => [ 'A', 'B' ],
@@ -44,3 +40,5 @@ foreach my $charset ( keys %charsets ) {
 
     ok($pass);
 }
+
+done_testing;
