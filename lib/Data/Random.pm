@@ -478,7 +478,7 @@ sub rand_image {
     return $image->png();
 
     sub _color {
-        return [ int( rand(266) ), int( rand(266) ), int( rand(266) ) ];
+        return [ int( rand(256) ), int( rand(256) ), int( rand(256) ) ];
     }
 }
 
