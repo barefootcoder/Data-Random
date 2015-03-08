@@ -49,7 +49,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-$Data::Random::VERSION = '0.11';
+$Data::Random::VERSION = '0.11_2';
 
 ################################################################################
 # - Subroutines
@@ -795,7 +795,7 @@ fgcolor - the foreground color of the image.  The value must be a reference to a
 
 =head1 VERSION
 
-0.11
+0.11_2
 
 
 =head1 AUTHOR
@@ -809,11 +809,14 @@ Currently maintained by: Buddy Burden (barefoot@cpan.org), starting with version
 
     Hiroki Chalfant
     David Sarno
+	Michiel Beijen
 
 
 =head1 COPYRIGHT
 
-Copyright (c) 2000-2011 Adekunle Olonoh.  All rights reserved.  This program is free software; you
+Copyright (c) 2000-2011 Adekunle Olonoh.
+Copyright (c) 2011-2015 Buddy Burden.
+All rights reserved.  This program is free software; you
 can redistribute it and/or modify it under the same terms as Perl itself.
 
 
