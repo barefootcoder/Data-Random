@@ -386,10 +386,16 @@ sub rand_datetime {
 
     if ( $options{min} ) {
         if ( $options{min} eq 'now' ) {
-            $minimum = $now;
+            $minimum = Time::Piece->strptime(
+              $now->strftime('%Y-%m-%d %T'),
+              '%Y-%m-%d %T'
+            );
         }
         else {
-            $minimum = Time::Piece->strptime($options{min}, '%Y-%m-%d %T');
+            $minimum = Time::Piece->strptime(
+              $options{min},
+              '%Y-%m-%d %T'
+            );
         }
     }
     else {
@@ -398,19 +404,24 @@ sub rand_datetime {
 
     if ( $options{max} ) {
         if ( $options{max} eq 'now' ) {
-            $maximum = $now;
+            $maximum = Time::Piece->strptime(
+              $now->strftime('%Y-%m-%d %T'),
+              '%Y-%m-%d %T'
+            );
         }
         else {
-              $maximum = Time::Piece->strptime($options{max}, '%Y-%m-%d %T');
+            $maximum = Time::Piece->strptime(
+              $options{max},
+              '%Y-%m-%d %T'
+            );
         }
     }
     else {
-        $maximum =  $minimum->add_years(1);
+        $maximum = $minimum->add_years(1);
     }
 
     my $delta_secs = $maximum - $minimum;
     cluck('max_date is later than min date') && return if $delta_secs < 0;
-
     $delta_secs = int( rand( $delta_secs + 1 ) );
 
     my $result = $minimum + $delta_secs;
