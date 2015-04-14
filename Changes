@@ -1,5 +1,8 @@
 Revision history for Perl module Data::Random
 
+0.11_3	2015-04-??
+		- fixing rand_datetime on MSWin32 after Time::Piece
+
 0.11_2	2015-03-08T14:39:17-0700
 		- fixing tests to work for local timezone
 

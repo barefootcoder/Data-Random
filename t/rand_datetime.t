@@ -57,8 +57,8 @@ for my $test (@tests) {
   note "Running $test->{name}";
 
   # creating Time::Piece objects from 'min' and 'max' values.
-  my $min_date = Time::Piece->strptime($test->{min},"%Y-%m-%d %T");
-  my $max_date = Time::Piece->strptime($test->{max},"%Y-%m-%d %T");
+  my $min_date = Time::Piece->strptime($test->{min},"%Y-%m-%d %H:%M:%S");
+  my $max_date = Time::Piece->strptime($test->{max},"%Y-%m-%d %H:%M:%S");
 
   for ( 0..999 ) {
     my $rand_datetime = rand_datetime(%{$test->{args}});
@@ -68,7 +68,7 @@ for my $test (@tests) {
       'rand_datetime format'
     );
 
-    my $result   = Time::Piece->strptime($rand_datetime,  "%Y-%m-%d %T");
+    my $result   = Time::Piece->strptime($rand_datetime,  "%Y-%m-%d %H:%M:%S");
     cmp_ok($result, '>=', $min_date, 'rand_datetime not smaller than minimum');
     cmp_ok($result, '<=', $max_date, 'rand_datetime not bigger than maximum');
   }

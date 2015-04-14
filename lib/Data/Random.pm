@@ -387,14 +387,14 @@ sub rand_datetime {
     if ( $options{min} ) {
         if ( $options{min} eq 'now' ) {
             $minimum = Time::Piece->strptime(
-              $now->strftime('%Y-%m-%d %T'),
-              '%Y-%m-%d %T'
+              $now->strftime('%Y-%m-%d %H:%M:%S'),
+              '%Y-%m-%d %H:%M:%S'
             );
         }
         else {
             $minimum = Time::Piece->strptime(
               $options{min},
-              '%Y-%m-%d %T'
+              '%Y-%m-%d %H:%M:%S'
             );
         }
     }
@@ -405,14 +405,14 @@ sub rand_datetime {
     if ( $options{max} ) {
         if ( $options{max} eq 'now' ) {
             $maximum = Time::Piece->strptime(
-              $now->strftime('%Y-%m-%d %T'),
-              '%Y-%m-%d %T'
+              $now->strftime('%Y-%m-%d %H:%M:%S'),
+              '%Y-%m-%d %H:%M:%S'
             );
         }
         else {
             $maximum = Time::Piece->strptime(
               $options{max},
-              '%Y-%m-%d %T'
+              '%Y-%m-%d %H:%M:%S'
             );
         }
     }
@@ -426,7 +426,7 @@ sub rand_datetime {
 
     my $result = $minimum + $delta_secs;
 
-    return $result->strftime('%Y-%m-%d %T');
+    return $result->strftime('%Y-%m-%d %H:%M:%S');
 }
 
 ################################################################################
