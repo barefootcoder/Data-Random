@@ -1,19 +1,19 @@
 Revision history for Perl module Data::Random
 
-0.11_3	2015-04-??
-		- require Time::Piece 1.16 because it has add_year()
-		- fixing rand_datetime on MSWin32 after Time::Piece
+0.11_3  2015-04-19T17:10:08-0700
+        - require Time::Piece 1.16 because it has add_year()
+        - fixing rand_datetime on MSWin32 after Time::Piece
 
-0.11_2	2015-03-08T14:39:17-0700
-		- fixing tests to work for local timezone
+0.11_2  2015-03-08T14:39:17-0700
+        - fixing tests to work for local timezone
 
-0.11_1	2015-02-17T02:17:06-0800
-		- convert from Date::Calc to Time::Piece
-		- convert to File::Temp
-		- lots of cleanup
-		Thanks to mbeijen (Michiel Beijen) for these improvements!
-		- colors can only go up to 255 (RT/100995)
-		Thanks to jrosenboom
+0.11_1  2015-02-17T02:17:06-0800
+        - convert from Date::Calc to Time::Piece
+        - convert to File::Temp
+        - lots of cleanup
+        Thanks to mbeijen (Michiel Beijen) for these improvements!
+        - colors can only go up to 255 (RT/100995)
+        Thanks to jrosenboom
 
 0.11    2014-01-01T15:09:57-0800
         - remove MYMETA.* from dist and add them to MANIFEST.SKIP (RT/89174)
