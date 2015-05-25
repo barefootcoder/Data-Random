@@ -1,14 +1,10 @@
 Revision history for Perl module Data::Random
 
-0.11_3  2015-04-19T17:10:08-0700
-        - require Time::Piece 1.16 because it has add_year()
-        - fixing rand_datetime on MSWin32 after Time::Piece
-
-0.11_2  2015-03-08T14:39:17-0700
-        - fixing tests to work for local timezone
-
-0.11_1  2015-02-17T02:17:06-0800
+0.12	2015-05-25T10:44:00-0700
         - convert from Date::Calc to Time::Piece
+            - require Time::Piece 1.16 because it has add_year()
+            - fixed rand_datetime on MSWin32 after Time::Piece
+            - fixed tests to work for local timezone
         - convert to File::Temp
         - lots of cleanup
         Thanks to mbeijen (Michiel Beijen) for these improvements!
