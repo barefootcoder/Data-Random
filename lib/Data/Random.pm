@@ -49,7 +49,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-$Data::Random::VERSION = '0.12';
+our $VERSION = '0.12';
 
 ################################################################################
 # - Subroutines
