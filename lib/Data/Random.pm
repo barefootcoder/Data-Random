@@ -244,7 +244,7 @@ sub rand_set {
 sub rand_enum {
 
     # Get the options hash
-    my %options = @_;
+    my %options = (ref $_[0] eq 'ARRAY') ?  ( set => @_ ) : @_;
 
     # Make sure the set array was defined
     cluck('set array is not defined') && return if !$options{'set'};
@@ -642,7 +642,7 @@ This returns a random element given an initial set.  See below for possible para
 
 =item *
 
-set - the set of strings to be used.  This should be a reference to an array of strings.
+set - the set of strings to be used.  This should be a reference to an array of strings. The C<set> key will be assumed if the array reference is passed as the first argument.
 
 =back
 
