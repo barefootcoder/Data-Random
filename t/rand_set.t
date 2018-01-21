@@ -85,6 +85,22 @@ describe 'Get random elements' => sub {
             }
             ok 1, 'pass';
         };
+
+    };
+
+};
+
+describe 'Return by calling context' => sub {
+    before_each 'Seed' => sub { srand 1234 };
+
+    it 'Returns array reference in scalar context' => sub {
+        my $elems = rand_set( set => ['a' .. 'z'], size => 5, shuffle => 0 );
+        is $elems, [qw( f h i t z )];
+    };
+
+    it 'Returns array in array context' => sub {
+        my @elems = rand_set( set => ['a' .. 'z'], size => 5, shuffle => 0 );
+        is \@elems, [qw( f h i t z )];
     };
 };
 

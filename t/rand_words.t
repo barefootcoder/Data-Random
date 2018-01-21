@@ -1,4 +1,4 @@
-use Test2::V0 -srand => 123456;
+use Test2::V0;
 use Test2::Tools::Spec;
 use Test2::Plugin::DieOnFail;
 
@@ -21,6 +21,8 @@ describe 'Single random word' => sub {
 
         close($fh);
     };
+
+    before_each 'Set seed' => sub {  srand 123456 };
 
     it 'Should return one word by default' => sub {
         foreach (1 .. $num_words) {
@@ -77,6 +79,37 @@ describe 'Single random word' => sub {
             is scalar(@words), 2, 'Got right number of words';
             cmp_ok $words[0], 'lt', $words[1], 'Words are ordered';
         }
+    };
+
+    it 'Can use default wordlist' => sub {
+        my @words = rand_words(
+            size    => 2,
+            shuffle => 0,
+        );
+
+        is \@words, [qw( pickings unanalyzable )], 'Got right words';
+    };
+
+    it 'Returns array reference in scalar context' => sub {
+        my $words = rand_words(
+            size    => 2,
+            shuffle => 0,
+        );
+
+        is $words, [qw( pickings unanalyzable )], 'Got right words';
+    };
+
+    it 'Can use existing WordList object' => sub {
+        require Data::Random::WordList;
+
+        my @words = rand_words(
+            wordlist => Data::Random::WordList->new( wordlist => $wordlist ),
+            size    => 2,
+            shuffle => 0,
+        );
+
+        is scalar(@words), 2, 'Got right number of words';
+        cmp_ok $words[0], 'lt', $words[1], 'Words are ordered';
     };
 };
 

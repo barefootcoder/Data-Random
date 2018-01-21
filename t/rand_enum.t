@@ -1,4 +1,4 @@
-use Test2::V0 -srand => 123456;
+use Test2::V0;
 use Test2::Tools::Spec;
 
 use Data::Random qw( rand_enum );
@@ -6,7 +6,6 @@ use Data::Random qw( rand_enum );
 describe 'Single random element' => sub {
     my ($set);
 
-    case 'empty set'      => sub { $set = []           };
     case 'single element' => sub { $set = ['A'];       };
     case 'two elements'   => sub { $set = ['A', 'B']   };
     case 'roman alphabet' => sub { $set = ['A' .. 'Z'] };
@@ -18,45 +17,47 @@ describe 'Single random element' => sub {
             $valid = { map { $_ => 1 } @{$set} };
         };
 
-        tests 'Random element is valid' => sub {
-            my $result = 1;
-            foreach (@{$set}) {
-                my @elems = rand_enum( set => $set );
-
-                unless (scalar(@elems) == 1) {
-                    note 'Did not get a single element';
-                    $result = 0;
-                    last;
-                }
-
-                unless (exists $valid->{ $elems[0] }) {
-                    note 'Did not get a valid element';
-                    $result = 0;
-                    last;
-                }
-            }
-            ok $result;
+        it 'Returns a single valid element' => sub {
+            my @elems = rand_enum( set => $set );
+            is scalar(@elems), 1, 'Got a single element';
+            like $valid, { map { $_ => 1 } @elems }, 'Got a valid element';
         };
 
-        tests 'Can omit "set" if using only an array ref' => sub {
-            my $result = 1;
-            if (@{$set}) {
-                my $char = rand_enum($set);
-
-                unless ($char) {
-                    note 'Did not return a character';
-                    $result = 0;
-                    last;
-                }
-
-                unless (exists $valid->{ $char }) {
-                    note 'Did not return a valid character';
-                    $result = 0;
-                    last;
-                }
-            }
-            ok $result;
+        it 'Assumes set when only argument is an array ref' => sub {
+            my @elems = rand_enum( $set );
+            is scalar(@elems), 1, 'Got a single element';
+            like $valid, { map { $_ => 1 } @elems }, 'Got a valid element';
         };
+    };
+};
+
+describe 'Edge cases' => sub {
+    my $elem;
+
+    it 'Returns undef with an empty set' => sub {
+        is rand_enum( set => [] ), U();
+    };
+
+    it 'Dies if set is not an array reference' => sub {
+        like dies { rand_enum( set => {} ) }, qr/Not an ARRAY reference/;
+    };
+
+    it 'Requires a set' => sub {
+        like warning { $elem = rand_enum() }, qr/set array is not defined/;
+        is $elem, U(), 'Returns undefined';
+    };
+
+    it 'Only assumes set when given a single argument array reference' => sub {
+        like warning { $elem = rand_enum( [], 'foo' ) },
+            qr/set array is not defined/;
+        is $elem, U(), 'Returns undefined';
+
+        like warnings { $elem = rand_enum( {} ) },
+            [
+                qr/even-sized list expected/,
+                qr/set array is not defined/,
+            ];
+        is $elem, U(), 'Returns undefined';
     };
 };
 
