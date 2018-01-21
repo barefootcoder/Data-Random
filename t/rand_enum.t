@@ -1,50 +1,63 @@
-use strict;
-use warnings;
+use Test2::V0 -srand => 123456;
+use Test2::Tools::Spec;
 
-use Test::More;
 use Data::Random qw( rand_enum );
 
-my %charsets = (
-    a => [],
-    b => ['A'],
-    c => [ 'A', 'B' ],
-    d => [ 'A' .. 'Z' ],
-);
+describe 'Single random element' => sub {
+    my ($set);
 
-my %valid_chars;
+    case 'empty set'      => sub { $set = []           };
+    case 'single element' => sub { $set = ['A'];       };
+    case 'two elements'   => sub { $set = ['A', 'B']   };
+    case 'roman alphabet' => sub { $set = ['A' .. 'Z'] };
 
-foreach my $charset ( keys %charsets ) {
-    @{ $valid_chars{$charset} }{ @{ $charsets{$charset} } } = ();
-}
+    describe 'Get an element from a list' => sub {
+        my ($valid);
 
-# Test default w/ no params -- should return one entry
-{
-    my $pass = 1;
+        before_all 'Hash valid elements' => sub {
+            $valid = { map { $_ => 1 } @{$set} };
+        };
 
-    foreach my $charset ( keys %charsets ) {
+        tests 'Random element is valid' => sub {
+            my $result = 1;
+            foreach (@{$set}) {
+                my @elems = rand_enum( set => $set );
 
-        my $num_chars = @{ $charsets{$charset} };
+                unless (scalar(@elems) == 1) {
+                    note 'Did not get a single element';
+                    $result = 0;
+                    last;
+                }
 
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_enum( set => $charsets{$charset} );
+                unless (exists $valid->{ $elems[0] }) {
+                    note 'Did not get a valid element';
+                    $result = 0;
+                    last;
+                }
+            }
+            ok $result;
+        };
 
-            $pass = 0
-              unless ( @chars == 1
-                && exists( $valid_chars{$charset}->{ $chars[0] } ) );
+        tests 'Can omit "set" if using only an array ref' => sub {
+            my $result = 1;
+            if (@{$set}) {
+                my $char = rand_enum($set);
 
-            $i++;
-        }
+                unless ($char) {
+                    note 'Did not return a character';
+                    $result = 0;
+                    last;
+                }
 
-    }
-
-    ok($pass);
-}
-
-{
-    my $char = rand_enum($charsets{d});
-    ok $char, 'Can omit "set" if using an array ref';
-    ok exists $valid_chars{d}->{ $char }, 'Got a valid random character';
-}
+                unless (exists $valid->{ $char }) {
+                    note 'Did not return a valid character';
+                    $result = 0;
+                    last;
+                }
+            }
+            ok $result;
+        };
+    };
+};
 
 done_testing;

@@ -1,28 +1,21 @@
-use strict;
-use warnings;
+use Test2::V0 -srand => 123456;
+use Test2::Tools::Spec;
 
-use Test::More;
+eval q{ use GD };
+skip_all 'GD not installed' if $@;
+
 use Data::Random qw( rand_image );
 use File::Temp;
 
-# Try to load GD
-eval q{ use GD };
-
-SKIP: {
-
-    # If the module cannot be loaded, skip tests
-    skip('GD not installed', 1) if $@;
-
-    my ($fh, $imagefile) = File::Temp::tempfile();
-
-    # Test writing an image to a file
-    {
+describe 'Random image tests' => sub {
+    tests 'Create a random image' => sub {
+        my ($fh, $imagefile) = File::Temp::tempfile();
         binmode($fh);
         print $fh rand_image( bgcolor => [ 0, 0, 0 ] );
         close($fh);
 
-        ok( !( -z $imagefile ) );
-    }
-}
+        ok !( -z $imagefile );
+    };
+};
 
 done_testing;

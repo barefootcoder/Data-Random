@@ -1,181 +1,98 @@
-use strict;
-use warnings;
+use Test2::V0 -srand => 123456;
+use Test2::Tools::Spec;
+use Test2::Plugin::DieOnFail;
 
-use Test::More;
 use Data::Random qw( rand_set );
 
-use vars qw( %charsets );
+describe 'Get random elements' => sub {
+    my ($set);
 
-%charsets = (
-    a => [],
-    b => ['A'],
-    c => [ 'A', 'B' ],
-    d => [ 'A' .. 'Z' ],
-);
+    case 'empty set'      => sub { $set = []           };
+    case 'single element' => sub { $set = ['A'];       };
+    case 'two elements'   => sub { $set = ['A', 'B']   };
+    case 'roman alphabet' => sub { $set = ['A' .. 'Z'] };
 
-my %valid_chars;
+    describe 'Get elements from a list' => sub {
+        my ($valid);
 
-foreach my $charset ( keys %charsets ) {
-    @{ $valid_chars{$charset} }{ @{ $charsets{$charset} } } = ();
-}
+        before_all 'Hash valid elements' => sub {
+            $valid = { map { $_ => 1 } @{$set} };
+        };
 
-# Test default w/ no params -- should return one entry
-{
-    my $pass = 1;
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_set( set => $charsets{$charset} );
-
-            $pass = 0
-              unless ( @chars == 1
-                && exists( $valid_chars{$charset}->{ $chars[0] } ) );
-
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-# Test size option
-{
-    my $pass = 1;
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_set( set => $charsets{$charset}, size => $i + 1 );
-
-            $pass = 0 unless @chars == ( $i + 1 );
-
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
+        it 'Defaults to returning a single element' => sub {
+            foreach (@{$set}) {
+                my @elems = rand_set( set => $set );
+                is scalar(@elems), 1, 'Got a single element';
+                ok exists $valid->{ $elems[0] }, 'Is a valid element';
             }
+            ok 1, 'pass';
+        };
 
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-# Test max/min option
-{
-    my $pass = 1;
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_set(
-                set => $charsets{$charset},
-                min => $i,
-                max => $num_chars
-            );
-
-            $pass = 0 unless ( @chars >= $i && @chars <= $num_chars );
-
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
+        it 'Can return more elements with size parameter' => sub {
+            foreach my $size (1 .. scalar @{$set}) {
+                my @elems = rand_set( set => $set, size => $size );
+                is scalar(@elems), $size, 'Got right number of elements';
+                like $valid, { map { $_ => 1 } @elems }, 'All elements are valid';
             }
+            ok 1, 'pass';
+        };
 
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-# Test size w/ min/max set
-{
-    my $pass = 1;
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_set(
-                set  => $charsets{$charset},
-                size => $i + 1,
-                min  => $i,
-                max  => $num_chars
-            );
-
-            $pass = 0 unless @chars == ( $i + 1 );
-
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-            }
-
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-# Test w/ shuffle set to 0
-{
-    my $pass = 1;
-
-    sub _get_index {
-        my ( $charset, $char ) = @_;
-
-        my $i = 0;
-        while ( $charsets{$charset}->[$i] ne $char
-            && $i < @{ $charsets{$charset} } )
-        {
-            $i++;
-        }
-
-        $i;
-    }
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        if ( $num_chars >= 2 ) {
-            my $i = 0;
-            while ( $pass && $i < $num_chars ) {
-                my @chars = rand_set(
-                    set     => $charsets{$charset},
-                    size    => 2,
-                    shuffle => 0
+        it 'Can specify a minimum and a maximum for return size' => sub {
+            foreach my $size (1 .. scalar @{$set}) {
+                my $min = $size - 1;
+                my @elems = rand_set(
+                    set => $set,
+                    min => $min,
+                    max => scalar(@{$set}),
                 );
 
-                $pass = 0
-                  unless ( @chars == 2
-                    && _get_index( $charset, $chars[0] ) <
-                    _get_index( $charset, $chars[1] ) );
-
-                foreach (@chars) {
-                    $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-                }
-
-                $i++;
+                cmp_ok scalar(@elems), '>=', $min,
+                    'Got right number of elements';
+                like $valid, { map { $_ => 1 } @elems }, 'All elements are valid';
             }
-        }
+            ok 1, 'pass';
+        };
 
-    }
+        it 'Ignores min and max if size is set' => sub {
+            foreach my $size (1 .. scalar @{$set}) {
+                my @elems = rand_set(
+                    set  => $set,
+                    size => $size,
+                    min  => $size - 1,
+                    max  => scalar(@{$set}),
+                );
 
-    ok($pass);
-}
+                is scalar(@elems), $size, 'Got right number of elements';
+                like $valid, { map { $_ => 1 } @elems }, 'All elements are valid';
+            }
+            ok 1, 'pass';
+        };
+
+        it 'Can keep order of elements' => sub {
+            foreach (@{$set}) {
+                last unless scalar(@{$set}) >= 2;
+
+                my @elems = rand_set(
+                    set     => $set,
+                    size    => 2,
+                    shuffle => 0,
+                );
+
+                is scalar(@elems), 2, 'Got right number of elements';
+                cmp_ok
+                    _get_index($set, $elems[0]), '<',
+                    _get_index($set, $elems[1]), 'Elements are ordered';
+            }
+            ok 1, 'pass';
+        };
+    };
+};
 
 done_testing;
+
+sub _get_index {
+    my ( $set, $char ) = @_;
+    my $i = 0;
+    $i++ while $set->[$i] ne $char && $i < @{ $set };
+    $i;
+}

@@ -1,120 +1,83 @@
-use strict;
-use warnings;
+use Test2::V0 -srand => 123456;
+use Test2::Tools::Spec;
+use Test2::Plugin::DieOnFail;
 
-use Test::More;
 use Data::Random qw( rand_words );
 use File::Temp;
 
-use vars qw( $wordlist );
+describe 'Single random word' => sub {
+    my ($valid, $num_words, $wordlist);
 
-my ($fh, $wordlist) = File::Temp::tempfile();
-foreach ( 'A' .. 'Z' ) {
-    print $fh "$_\n";
-}
-close($fh);
+    before_all 'Prepare data' => sub {
+        my $fh;
 
-my %valid_words;
-@valid_words{ 'A' .. 'Z' } = ();
+        $num_words = 26;
+        ($fh, $wordlist) = File::Temp::tempfile();
 
-my $num_words = 26;
-
-# Test default w/ no params -- should return one entry
-{
-    my $pass = 1;
-
-    my $i = 0;
-    while ( $pass && $i < $num_words ) {
-        my @words = rand_words( wordlist => $wordlist );
-
-        $pass = 0 unless ( @words == 1 && exists( $valid_words{ $words[0] } ) );
-
-        $i++;
-    }
-
-    ok($pass);
-}
-
-# Test size option
-{
-    my $pass = 1;
-
-    my $i = 0;
-    while ( $pass && $i < $num_words ) {
-        my @words = rand_words( wordlist => $wordlist, size => $i + 1 );
-
-        $pass = 0 unless @words == ( $i + 1 );
-
-        foreach (@words) {
-            $pass = 0 unless exists( $valid_words{$_} );
+        foreach ( 'A' .. 'Z' ) {
+            print $fh "$_\n";
+            $valid->{$_} = 1;
         }
 
-        $i++;
-    }
+        close($fh);
+    };
 
-    ok($pass);
-}
-
-# Test max/min option
-{
-    my $pass = 1;
-
-    my $i = 0;
-    while ( $pass && $i < $num_words ) {
-        my @words =
-          rand_words( wordlist => $wordlist, min => $i, max => $num_words );
-
-        $pass = 0 unless ( @words >= $i && @words <= $num_words );
-
-        foreach (@words) {
-            $pass = 0 unless exists( $valid_words{$_} );
+    it 'Should return one word by default' => sub {
+        foreach (1 .. $num_words) {
+            my @words = rand_words( wordlist => $wordlist );
+            is scalar(@words), 1, 'Got a single word';
+            ok exists $valid->{ $words[0] }, 'Is a valid word';
         }
+    };
 
-        $i++;
-    }
-
-    ok($pass);
-}
-
-# Test size w/ min/max set
-{
-    my $pass = 1;
-
-    my $i = 0;
-    while ( $pass && $i < $num_words ) {
-        my @words = rand_words(
-            wordlist => $wordlist,
-            size     => $i + 1,
-            min      => $i,
-            max      => $num_words
-        );
-
-        $pass = 0 unless @words == ( $i + 1 );
-
-        foreach (@words) {
-            $pass = 0 unless exists( $valid_words{$_} );
+    it 'Can specify return size' => sub {
+        foreach my $size (1 .. $num_words) {
+            my @words = rand_words( wordlist => $wordlist, size => $size );
+            is scalar(@words), $size, 'Got right number of words';
+            like $valid, { map { $_ => 1 } @words }, 'All words are valid';
         }
+    };
 
-        $i++;
-    }
+    it 'Can specify min and maximum for return list' => sub {
+        foreach my $size (1 .. $num_words) {
+            my $min = $size - 1;
+            my @words = rand_words(
+                wordlist => $wordlist,
+                min      => $min,
+                max      => $num_words,
+            );
 
-    ok($pass);
-}
+            cmp_ok scalar(@words), '>=', $min, 'Got right number of words';
+            like $valid, { map { $_ => 1 } @words }, 'All words are valid';
+        }
+    };
 
-# Test w/ shuffle set to 0
-{
-    my $pass = 1;
+    it 'Ignores min and max if size is set' => sub {
+        foreach my $size (1 .. $num_words) {
+            my @words = rand_words(
+                wordlist => $wordlist,
+                size     => $size,
+                min      => $size - 1,
+                max      => $num_words,
+            );
 
-    my $i = 0;
-    while ( $pass && $i < $num_words ) {
-        my @words =
-          rand_words( wordlist => $wordlist, size => 2, shuffle => 0 );
+            is scalar(@words), $size, 'Got right number of words';
+            like $valid, { map { $_ => 1 } @words }, 'All words are valid';
+        }
+    };
 
-        $pass = 0 unless ( @words == 2 && !( $words[0] gt $words[1] ) );
+    it 'Can keep order of words' => sub {
+        foreach (1.. $num_words) {
+            my @words = rand_words(
+                wordlist => $wordlist,
+                size    => 2,
+                shuffle => 0,
+            );
 
-        $i++;
-    }
-
-    ok($pass);
-}
+            is scalar(@words), 2, 'Got right number of words';
+            cmp_ok $words[0], 'lt', $words[1], 'Words are ordered';
+        }
+    };
+};
 
 done_testing;
