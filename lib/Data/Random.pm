@@ -244,7 +244,7 @@ sub rand_set {
 sub rand_enum {
 
     # Get the options hash
-    my %options = (ref $_[0] eq 'ARRAY') ?  ( set => @_ ) : @_;
+    my %options = @_ == 1 && ref $_[0] eq 'ARRAY' ? ( set => @_ ) : @_;
 
     # Make sure the set array was defined
     cluck('set array is not defined') && return if !$options{'set'};
@@ -516,6 +516,7 @@ Data::Random - Perl module to generate random data
   my @random_set = rand_set( set => \@set, size => 5 );
 
   my $random_enum = rand_enum( set => \@set );
+  my $random_enum = rand_enum( \@set ); # shortcut
 
   my $random_date = rand_date();
 
@@ -642,7 +643,7 @@ This returns a random element given an initial set.  See below for possible para
 
 =item *
 
-set - the set of strings to be used.  This should be a reference to an array of strings. The C<set> key will be assumed if the array reference is passed as the first argument.
+set - the set of strings to be used.  This should be a reference to an array of strings. The C<set> key will be assumed if the array reference is passed as the only argument.
 
 =back
 
