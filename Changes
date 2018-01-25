@@ -6,6 +6,8 @@ Revision history for Perl module Data::Random
           Thanks to jjatria (José Joaquin Atria) for doing the work
           - upgrade to Dist::Zilla
           Thanks to jjatria (José Joaquin Atria) for the pull request
+          - use Test::MockTime to avoid off-by-a-second bogus test failures
+          Thanks to jjatria (José Joaquin Atria) for the pull request
 
 0.12    2015-05-25T10:44:00-0700
         - convert from Date::Calc to Time::Piece
