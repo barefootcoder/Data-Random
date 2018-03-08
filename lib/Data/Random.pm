@@ -316,14 +316,15 @@ sub rand_time {
             ( $min_hour, $min_min, $min_sec ) = ( $hour, $min, $sec );
         }
         else {
-            ( $min_hour, $min_min, $min_sec ) = split ( /\:/, $options{'min'} );
-
-            cluck('minimum time is not in valid time format HH:MM:SS') && return
-              if ( $min_hour > 23 ) || ( $min_hour < 0 );
-            cluck('minimum time is not in valid time format HH:MM:SS') && return
-              if ( $min_min > 59 ) || ( $min_min < 0 );
-            cluck('minimum time is not in valid time format HH:MM:SS') && return
-              if ( $min_sec > 59 ) || ( $min_sec < 0 );
+            eval {
+                my $min = Time::Piece->strptime( $options{min}, '%T' );
+                ( $min_hour, $min_min, $min_sec )
+                    = ( $min->hour, $min->min, $min->sec );
+            };
+            if ($@) {
+                cluck 'minimum time is not in valid time format HH:MM:SS';
+                return;
+            }
         }
     }
     else {
@@ -339,14 +340,15 @@ sub rand_time {
             ( $max_hour, $max_min, $max_sec ) = ( $hour, $min, $sec );
         }
         else {
-            ( $max_hour, $max_min, $max_sec ) = split ( /\:/, $options{'max'} );
-
-            cluck('maximum time is not in valid time format HH:MM:SS') && return
-              if ( $max_hour > 23 ) || ( $max_hour < 0 );
-            cluck('maximum time is not in valid time format HH:MM:SS') && return
-              if ( $max_min > 59 ) || ( $max_min < 0 );
-            cluck('maximum time is not in valid time format HH:MM:SS') && return
-              if ( $max_sec > 59 ) || ( $max_sec < 0 );
+            eval {
+                my $max = Time::Piece->strptime( $options{max}, '%T' );
+                ( $max_hour, $max_min, $max_sec )
+                    = ( $max->hour, $max->min, $max->sec );
+            };
+            if ($@) {
+                cluck 'maximum time is not in valid time format HH:MM:SS';
+                return;
+            }
         }
     }
     else {
