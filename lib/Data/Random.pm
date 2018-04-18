@@ -49,7 +49,7 @@ use vars qw(
 @EXPORT_OK = ( @{ $EXPORT_TAGS{'all'} } );
 @EXPORT    = qw();
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 ################################################################################
 # - Subroutines
