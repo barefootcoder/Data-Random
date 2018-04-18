@@ -157,7 +157,7 @@ sub rand_chars {
         elsif ( $options{'set'} eq 'alphanumeric' ) {
             @charset = ( 0 .. 9, 'a' .. 'z', 'A' .. 'Z' );
         }
-        elsif ( $options{'set'} eq 'misc' ) {
+        elsif ( $options{'set'} =~ /^(misc|char)$/ ) {
             @charset =
               ( '#', ',',
                 qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `)
@@ -585,6 +585,7 @@ set - the set of characters to be used.  This value can be either a reference to
     numeric      - numeric characters: 0-9
     alphanumeric - alphanumeric characters: a-z, A-Z, 0-9
     char         - non-alphanumeric characters: # ~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `
+    misc         - same as 'char'
     all          - all of the above
 
 =item *
