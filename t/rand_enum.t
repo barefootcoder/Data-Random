@@ -1,50 +1,64 @@
-use strict;
-use warnings;
+use Test2::V0;
+use Test2::Tools::Spec;
 
-use Test::More;
 use Data::Random qw( rand_enum );
 
-my %charsets = (
-    a => [],
-    b => ['A'],
-    c => [ 'A', 'B' ],
-    d => [ 'A' .. 'Z' ],
-);
+describe 'Single random element' => sub {
+    my ($set);
 
-my %valid_chars;
+    case 'single element' => sub { $set = ['A'];       };
+    case 'two elements'   => sub { $set = ['A', 'B']   };
+    case 'roman alphabet' => sub { $set = ['A' .. 'Z'] };
 
-foreach my $charset ( keys %charsets ) {
-    @{ $valid_chars{$charset} }{ @{ $charsets{$charset} } } = ();
-}
+    describe 'Get an element from a list' => sub {
+        my ($valid);
 
-# Test default w/ no params -- should return one entry
-{
-    my $pass = 1;
+        before_all 'Hash valid elements' => sub {
+            $valid = { map { $_ => 1 } @{$set} };
+        };
 
-    foreach my $charset ( keys %charsets ) {
+        it 'Returns a single valid element' => sub {
+            my @elems = rand_enum( set => $set );
+            is scalar(@elems), 1, 'Got a single element';
+            like $valid, { map { $_ => 1 } @elems }, 'Got a valid element';
+        };
 
-        my $num_chars = @{ $charsets{$charset} };
+        it 'Assumes set when only argument is an array ref' => sub {
+            my @elems = rand_enum( $set );
+            is scalar(@elems), 1, 'Got a single element';
+            like $valid, { map { $_ => 1 } @elems }, 'Got a valid element';
+        };
+    };
+};
 
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_enum( set => $charsets{$charset} );
+describe 'Edge cases' => sub {
+    my $elem;
 
-            $pass = 0
-              unless ( @chars == 1
-                && exists( $valid_chars{$charset}->{ $chars[0] } ) );
+    it 'Returns undef with an empty set' => sub {
+        is rand_enum( set => [] ), U();
+    };
 
-            $i++;
-        }
+    it 'Dies if set is not an array reference' => sub {
+        like dies { rand_enum( set => {} ) }, qr/Not an ARRAY reference/;
+    };
 
-    }
+    it 'Requires a set' => sub {
+        like warning { $elem = rand_enum() }, qr/set array is not defined/;
+        is $elem, U(), 'Returns undefined';
+    };
 
-    ok($pass);
-}
+    it 'Only assumes set when given a single argument array reference' => sub {
+        like warning { $elem = rand_enum( [], 'foo' ) },
+            qr/set array is not defined/;
+        is $elem, U(), 'Returns undefined';
 
-{
-    my $char = rand_enum($charsets{d});
-    ok $char, 'Can omit "set" if using an array ref';
-    ok exists $valid_chars{d}->{ $char }, 'Got a valid random character';
-}
+        like warnings { $elem = rand_enum( {} ) },
+            [
+                qr/even-sized list expected/,
+                qr/set array is not defined/,
+            ];
+        is $elem, U(), 'Returns undefined';
+    };
+};
 
 done_testing;

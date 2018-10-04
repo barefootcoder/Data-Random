@@ -1,82 +1,85 @@
-use strict;
-use warnings;
+use Test2::V0;
+use Test2::Tools::Spec;
 
-use Test::More;
-use Test::MockTime qw( set_fixed_time );
+BEGIN { use Test::MockTime qw( set_fixed_time ); }
+
 use Data::Random qw( rand_time );
+use Time::Piece;
 
-set_fixed_time('2018-01-21T18:54:00Z');
+describe 'Bad input' => sub {
+    my $time;
 
-# Test default w/ no params
-test_range();
+    it 'Warns if min time is later than max time' => sub {
+        like warning
+            { $time = rand_time( max => '10:00:00', min => '11:00:00' ) },
+            qr/later than/;
 
-# Test min option
-test_range('4:0:0');
+        is $time, U(), 'Returns undefined';
+    };
 
-# Test max option
-test_range(undef, '4:0:0');
+    it 'Warns if min time is not a time' => sub {
+        like warning
+            { $time = rand_time( min => 'not a time' ) },
+            qr/not in valid time format/;
 
-# Test min + max options
-test_range('9:0:0', '10:0:0');
+        is $time, U(), 'Returns undefined';
+    };
 
-# Test min + max options using "now"
-{
-    my $time = rand_time( min => 'now', max => 'now' );
-    my ( $hour, $min, $sec ) = ( localtime() )[ 2, 1, 0 ];
+    it 'Warns if max time is not a time' => sub {
+        like warning
+            { $time = rand_time( max => 'not a time' ) },
+            qr/not in valid time format/;
 
-    my ( $new_hour, $new_min, $new_sec ) = split ( /\:/, $time );
+        is $time, U(), 'Returns undefined';
+    };
+};
 
-    ok($new_hour == $hour && $new_min == $min && $new_sec == $sec, "random time constrained to a second works");
-}
+describe 'Time boundaries' => sub {
+    my ($min, $max, %args, %check);
+
+    before_all 'Fix time' => sub {
+        set_fixed_time('1987-12-18T04:05:06Z');
+    };
+
+    before_each 'Create Time::Piece objects' => sub {
+        $min = Time::Piece->strptime( $check{min} // '00:00:00', '%T' )->epoch;
+        $max = Time::Piece->strptime( $check{max} // '23:59:59', '%T' )->epoch;
+
+        srand(12345); # Generates 05:24:28
+    };
+
+    case 'No params' => sub {
+        %check = %args = ();
+    };
+
+    case 'With min' => sub {
+        %check = %args = ( min => '6:0:0' );
+    };
+
+    case 'With max' => sub {
+        %check = %args = ( max => '4:0:0' );
+    };
+
+    case 'With min and max' => sub {
+        %check = %args = ( min => '9:0:0', max => '10:0:0' );
+    };
+
+    case 'With min and max as now' => sub {
+        %args  = ( min => 'now',      max => 'now' );
+        %check = ( min => '04:05:06', max => '04:05:06' );
+    };
+
+    tests 'Random time is between boundaries' => sub {
+        my $rand_time = rand_time( %args );
+
+        like $rand_time, qr/^\d{1,2}:\d{1,2}:\d{1,2}$/, 'rand_time format';
+
+        my $result = Time::Piece->strptime( $rand_time, '%T' )->epoch;
+
+        note $rand_time;
+        cmp_ok $result, '>=', $min, 'rand_date >= minimum';
+        cmp_ok $result, '<=', $max, 'rand_date <= maximum';
+    };
+};
 
 done_testing;
-
-
-sub test_range
-{
-    my ($min, $max) = @_;
-    my $min_secs = defined $min ? _to_secs($min) : 0;
-    my $max_secs = defined $max ? _to_secs($max) : _to_secs('23:59:59');
-
-    my @args;
-    push @args, min => $min if defined $min;
-    push @args, max => $max if defined $max;
-
-    # Running once for every possible value doesn't actually guarantee that we will _get_ every
-    # possible value, of course, since it's a randomly generated time.  Running 10 times for every
-    # possible value pretty much guarantees that, but it also takes forever.  So let's run 10x in
-    # the case of automated testers (like CPAN Testers), and just half that many otherwise (to keep
-    # installs speedy).
-    my $num_tests = $max_secs - $min_secs + 1;
-    $num_tests *= $ENV{AUTOMATED_TESTING} ? 10 : .5;
-
-    my $num_errors = 0;
-    my $test_name = "all randomly generated values within range";
-    for ( 1..$num_tests )
-    {
-        my $time = rand_time(@args);
-        my $secs = _to_secs($time);
-
-        unless (defined $secs && $min_secs <= $secs && $secs <= $max_secs)
-        {
-            fail($test_name);
-            diag "time out of range: $time";
-            ++$num_errors;
-        }
-    }
-
-    pass($test_name) unless $num_errors;
-}
-
-
-sub _to_secs {
-    my $time = shift;
-
-    my ( $hour, $min, $sec ) = split ( /\:/, $time );
-
-    return undef if ( $hour > 23 ) || ( $hour < 0 );
-    return undef if ( $min > 59 )  || ( $min < 0 );
-    return undef if ( $sec > 59 )  || ( $sec < 0 );
-
-    return $hour * 3600 + $min * 60 + $sec;
-}

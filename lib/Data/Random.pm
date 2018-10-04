@@ -234,7 +234,7 @@ sub rand_set {
         return @{ $options{'set'} }[@results];
     }
     else {
-        return \@{ $options{'set'} }[@results];
+        return [ @{ $options{'set'} }[@results] ];
     }
 }
 
@@ -776,11 +776,11 @@ height - the height of the image.  If you supply a value for 'width', then 'minw
 
 =item *
 
-minpixels - the minimum number of random pixels to display on the image.  The default is 0.
+minpixels - the minimum number of random pixels to display on the image.  The default is 0.  Note that this does not control the minimum number of pixels I<in the image>, since this is determined by the image's dimensions.
 
 =item *
 
-maxpixels - the maximum number of random pixels to display on the image.  The default is width * height.
+maxpixels - the maximum number of random pixels to display on the image.  The default is width * height. Note that this is not control the number of pixels I<in the image>, since this is determined by the image's dimensions.
 
 =item *
 

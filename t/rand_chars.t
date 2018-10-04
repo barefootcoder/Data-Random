@@ -1,257 +1,178 @@
-use strict;
-use warnings;
+use Test2::V0;
 
-use Test::More;
-use Data::Random qw( rand_chars );
+use Test2::Tools::Spec;
 
-use vars qw( %charsets );
+use Data::Random qw( rand_chars);
 
-%charsets = (
-    all => [
-        0 .. 9,
-        'a' .. 'z',
-        'A' .. 'Z',
-        '#',
-        ',',
-        qw( ~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; [ ] \ ` )
-    ],
-    alpha      => [ 'a' .. 'z',  'A' .. 'Z' ],
-    upperalpha => [ 'A' .. 'Z' ],
-    loweralpha => [ 'a' .. 'z' ],
-    numeric    => [ 0 .. 9 ],
-    alphanumeric => [ 0 .. 9, 'a' .. 'z', 'A' .. 'Z' ],
-    misc         => [
-        '#',
-        ',',
-        qw( ~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; [ ] \ ` )
-    ],
-);
+describe 'Context sensitivity' => sub {
+    my %args = ( set => [ 'A' .. 'Z' ], size => 5 );
 
-my %valid_chars;
-my $string;
+    before_each 'Seed' => sub { srand(123456); };
 
-foreach my $charset ( keys %charsets ) {
-    @{ $valid_chars{$charset} }{ @{ $charsets{$charset} } } = ();
-}
+    it 'Returns an array in list context' => sub {
+        is [ rand_chars( %args ) ], [qw( R Y Q B F )];
+    };
 
-# Test default w/ no params -- should return one entry
-{
-    my $pass = 1;
+    it 'Returns a concatenated string in scalar context' => sub {
+        is +rand_chars( %args ), 'RYQBF';
+    };
+};
 
-    foreach my $charset ( keys %charsets ) {
+describe 'Bad input' => sub {
+    it 'Assumes an empty set if it is unknown' => sub {
+        my @ret = rand_chars( set => 'some name', min => 0 );
+        is \@ret, [];
+    };
+};
 
-        my $num_chars = @{ $charsets{$charset} };
+describe 'Get random characters' => sub {
+    my (%charsets, $set, $size, $seed);
 
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_chars( set => $charsets{$charset} );
+    before_all 'Prepare data' => sub {
+        %charsets = (
+            loweralpha => [ 'a' .. 'z' ],
+            upperalpha => [ 'A' .. 'Z' ],
+            numeric    => [ 0 .. 9 ],
+            misc       => ['#', ',', qw#
+                ~ ! @ $ % ^ & * _ + = - | : " < > ? / . ' ; \ ` { } [ ] ( )
+            #],
+        );
 
-            $pass = 0
-              unless ( @chars == 1
-                && exists( $valid_chars{$charset}->{ $chars[0] } ) );
+        $charsets{all} = [ sort map { @{$_} } values %charsets ];
 
-            $string = rand_chars( set => $charsets{$charset} );
-            if (length($string) != 1 || !valid_chars($string, $charset)) {
-                $pass = 0;
-            }
+        $charsets{char} = $charsets{misc};
 
-            $i++;
-        }
+        $charsets{alpha} =
+            [ map { @{ $charsets{$_} } } qw( upperalpha loweralpha ) ];
 
-    }
+        $charsets{alphanumeric} =
+            [ map { @{ $charsets{$_} } } qw( alpha numeric ) ];
 
-    ok($pass);
-}
+        $size = 3;
+        $seed = 666;
+    };
 
-# Test size option
-{
-    my $pass = 1;
+    before_each 'Random seed' => sub {
+        srand($seed);
+    };
 
-    foreach my $charset ( keys %charsets ) {
+    describe 'Explicit sets' => sub {
 
-        my $num_chars = @{ $charsets{$charset} };
+        case 'alpha'      => sub { $set = $charsets{alpha}      };
+        case 'numeric'    => sub { $set = $charsets{numeric}    };
+        case 'misc'       => sub { $set = $charsets{misc}       };
+        case 'upperlapha' => sub { $set = $charsets{upperalpha} };
+        case 'lowerlapha' => sub { $set = $charsets{loweralpha} };
+        case 'all'        => sub { $set = $charsets{all}        };
 
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my $expected_length = $i + 1;
-            my @chars = rand_chars( set => $charsets{$charset},
-                                   size => $expected_length);
+        describe 'Foo' => sub {
+            my ($valid, $num_chars, $result);
 
-            $pass = 0 unless @chars == $expected_length;
+            before_all 'Hash valid elements' => sub {
+                $valid     = { map { $_ => 1 } @{$set} };
+                $num_chars = scalar @{$set};
+            };
 
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-            }
+            it 'Returns one character by default' => sub {
+                my @chars = rand_chars( set => $set );
+                is scalar(@chars), 1, 'Got a single char';
+                like $valid, { map { $_ => 1 } @chars }, 'Got a valid char';
+            };
 
-            $string = rand_chars( set => $charset, size => $expected_length );
-            if (   length($string) != $expected_length
-                || !valid_chars($string, $charset))
-            {
-                $pass = 0;
-            }
+            it 'Can specify return size' => sub {
+                my @chars = rand_chars( set => $set, size => $size );
+                is scalar(@chars), $size, 'Got right number of chars';
+                like $valid, { map { $_ => 1 } @chars }, 'All characters are valid';
+            };
 
-            $i++;
-        }
+            it 'Can specify min and maximum for return list' => sub {
+                my $max = int( scalar(@{$set}) / 2 ) + 1;
+                my @baseline;
 
-    }
+                do {
+                    $max--;
+                    srand($seed);
+                    @baseline = rand_chars( set => $set, max => $max );
+                } until $max < 1 or scalar(@baseline) < $max;
 
-    ok($pass);
-}
+                if ($max < 1) {
+                    ok 1, 'Abandoned test, because of bad seed';
+                    return;
+                };
 
-# Test max/min option
-{
-    my $pass = 1;
+                note 'Got ' . scalar @baseline . ' elements without min';
 
-    foreach my $charset ( keys %charsets ) {
+                srand($seed);
+                my $min = scalar(@baseline) + 1;
+                my @chars = rand_chars( set => $set, min => $min, max => $max );
 
-        my $num_chars = @{ $charsets{$charset} };
+                note 'Got ' . scalar @chars . ' elements with min';
 
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my @chars = rand_chars(
-                set => $charsets{$charset},
-                min => $i,
-                max => $num_chars
-            );
+                cmp_ok scalar(@chars), '>=', $min, 'Min affected rand_chars outcome';
+                like $valid, { map { $_ => 1 } @chars }, 'All characters are valid';
+            };
 
-            $pass = 0 unless ( @chars >= $i && @chars <= $num_chars );
+            it 'Ignores min and max if size is set' => sub {
+                my @chars = rand_chars(
+                    set  => $set,
+                    size => $size * 2,
+                    max  => $size,
+                );
 
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-            }
+                is scalar(@chars), $size * 2, 'Ignored max';
+                like $valid, { map { $_ => 1 } @chars }, 'All characters are valid';
 
-            $string = rand_chars( set => $charsets{$charset},
-                                  min => $i,
-                                  max => $num_chars
-                                );
-            if (   length($string) < $i
-                || length($string) > $num_chars
-                || !valid_chars($string, $charset))
-            {
-                $pass = 0;
-            }
+                @chars = rand_chars(
+                    set  => $set,
+                    size => $size,
+                    min  => $size * 2,
+                );
 
-            $i++;
-        }
+                is scalar(@chars), $size, 'Ignored min';
+                like $valid, { map { $_ => 1 } @chars }, 'All characters are valid';
+            };
 
-    }
+            it 'Can keep order of chars' => sub {
+                my @chars = rand_chars(
+                    set     => $set,
+                    size    => 2,
+                    shuffle => 0,
+                );
 
-    ok($pass);
-}
+                is scalar(@chars), 2, 'Got right number of chars';
+                ok _are_ordered( $set, @chars ), 'Characters are ordered';
+            };
+        };
+    };
 
-# Test size w/ min/max set
-{
-    my $pass = 1;
+    describe 'Sets by name' => sub {
+        case 'alpha'        => sub { $set = 'alpha'        };
+        case 'numeric'      => sub { $set = 'numeric'      };
+        case 'alphanumeric' => sub { $set = 'alphanumeric' };
+        case 'misc'         => sub { $set = 'misc'         };
+        case 'char'         => sub { $set = 'char'         };
+        case 'upperlapha'   => sub { $set = 'upperalpha'   };
+        case 'lowerlapha'   => sub { $set = 'loweralpha'   };
+        case 'all'          => sub { $set = 'all'          };
 
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my $expected_length = $i + 1;
-            my @chars = rand_chars(
-                set  => $charsets{$charset},
-                size => $expected_length,
-                min  => $i,
-                max  => $num_chars
-            );
-
-            $pass = 0 unless @chars == $expected_length;
-
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-            }
-
-            $string = rand_chars( set  => $charsets{$charset},
-                                  size => $i + 1,
-                                  min  => $i,
-                                  max  => $num_chars
-                                );
-            if (   length($string) != $expected_length
-                || !valid_chars($string, $charset))
-            {
-                $pass = 0;
-            }
-
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-# Test w/ shuffle set to 0
-{
-    my $pass = 1;
-
-    sub _get_index {
-        my ( $charset, $char ) = @_;
-
-        my $i = 0;
-        while ( $charsets{$charset}->[$i] ne $char
-            && $i < @{ $charsets{$charset} } )
-        {
-            $i++;
-        }
-
-        $i;
-    }
-
-    foreach my $charset ( keys %charsets ) {
-
-        my $num_chars = @{ $charsets{$charset} };
-
-        my $i = 0;
-        while ( $pass && $i < $num_chars ) {
-            my $expected_length = 2;
-            my @chars =
-              rand_chars( set     => $charsets{$charset},
-                          size    => $expected_length,
-                          shuffle => 0 );
-
-            $pass = 0
-              unless ( @chars == $expected_length
-                && _get_index( $charset, $chars[0] ) <
-                _get_index( $charset, $chars[1] ) );
-
-            foreach (@chars) {
-                $pass = 0 unless exists( $valid_chars{$charset}->{$_} );
-            }
-
-            $string = rand_chars( set     => $charsets{$charset},
-                                  size    => $expected_length,
-                                  shuffle => 0,
-                                );
-            if (   length($string) != $expected_length
-                || !valid_chars($string, $charset)
-                || (  _get_index($charset, substr($string, 0, 1))
-                    > _get_index($charset, substr($string, 1, 1))
-                   )
-               )
-            {
-                $pass = 0;
-            }
-
-            $i++;
-        }
-
-    }
-
-    ok($pass);
-}
-
-sub valid_chars
-{
-    my $string  = shift;
-    my $charset = shift;
-
-    foreach my $char (split('', $string)) {
-        return 0 if !exists($valid_chars{$charset}{$char});
-    }
-
-    return 1;
-}
+        it 'Gets characters from the correct set' => sub {
+            my $valid = { map { $_ => 1 } @{$charsets{$set}} };
+            my @chars = rand_chars( set => $set, size => 10 );
+            like $valid, { map { $_ => 1 } @chars }, 'All characters are valid';
+        };
+    };
+};
 
 done_testing;
+
+sub _are_ordered {
+    my ( $set, @chars ) = @_;
+    return _get_index($set, $chars[0]) < _get_index($set, $chars[1]);
+}
+
+sub _get_index {
+    my ( $set, $char ) = @_;
+    my $i = 0;
+    $i++ while $set->[$i] ne $char && $i < @{ $set };
+    $i;
+}

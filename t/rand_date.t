@@ -1,75 +1,88 @@
-use strict;
-use warnings;
-use Test::More;
+use Test2::V0;
+use Test2::Tools::Spec;
+
+BEGIN { use Test::MockTime qw( set_fixed_time ); }
 
 use Data::Random qw( rand_date );
 use Time::Piece;
 
-my $today = localtime;
+describe 'Bad input' => sub {
+    it 'Warns if min date is later than max date' => sub {
+        like warning
+            { rand_date( max => '2010-01-01', min => '2020-01-01' ) },
+            qr/later than/;
+    };
+};
 
-my $min_date = Time::Piece->strptime($today->ymd, "%Y-%m-%d");
-my $max_date = $min_date->add_years(1);
+describe 'Time boundaries' => sub {
+    my ($min_date, $max_date, $case);
 
-my @tests = (
-  {
-    name => 'no args',
-    args => {},
-    min  => $today->ymd,
-    max  => $today->add_years(1)->ymd,
-  },
-  {
-    name => 'min',
-    args => {
-      min => '1979-08-02',
-    },
-    min => '1979-08-02',
-    max => '1980-08-02',
-  },
-  {
-    name => 'min && max',
-    args => {
-      min => '2015-3-1',
-      max => '2015-5-10',
-    },
-    min => '2015-03-01',
-    max => '2015-05-10',
-  },
-  {
-    name => 'min now',
-    args => {
-      min => 'now',
-    },
-    min => $today->ymd,
-    max => $today->add_years(1)->ymd,
-  },
-  {
-    name => 'max now',
-    args => {
-      min => '2014-07-11',
-      max => 'now',
-    },
-    min => '2014-07-11',
-    max => $today->ymd,
-  },
-);
+    before_case 'Set fixed time' => sub {
+        set_fixed_time('1987-12-18T00:00:00Z');
+    };
 
-for my $test (@tests) {
-  note "Running $test->{name}";
+    before_each 'Create Time::Piece objects' => sub {
+        $min_date = Time::Piece->strptime( $case->{min}, '%Y-%m-%d' );
+        $max_date = Time::Piece->strptime( $case->{max}, '%Y-%m-%d' );
 
-  # creating Time::Piece objects from 'min' and 'max' values.
-  my $min_date = Time::Piece->strptime($test->{min},"%Y-%m-%d");
-  my $max_date = Time::Piece->strptime($test->{max},"%Y-%m-%d");
+        srand(12345); # Generates 2018-04-27
+    };
 
-  for ( 0..999 ) {
-    my $rand_date = rand_date(%{$test->{args}});
-    note "Result: $rand_date";
-    like($rand_date, qr/^\d{4}-\d{2}-\d{2}$/, 'rand_date format');
+    case 'max now' => sub {
+        my $today = localtime;
+        $case = {
+            args => { min => '1986-12-18', max => 'now' },
+            min => $today->add_years(-1)->ymd,
+            max => $today->ymd,
+        };
+    };
 
-    my $result   = Time::Piece->strptime($rand_date,  "%Y-%m-%d");
-    cmp_ok($result, '>=', $min_date, 'rand_date not smaller than minimum');
-    cmp_ok($result, '<=', $max_date, 'rand_date not bigger than maximum');
-  }
-}
+    case 'min now' => sub {
+        set_fixed_time('2020-12-18T00:00:00Z');
+        my $today = localtime;
+        $case = {
+            args => { min => 'now' },
+            min => $today->ymd,
+            max => $today->add_years(1)->ymd,
+        };
+    };
+
+    case 'min && max' => sub {
+        $case = {
+            args => { min => '2015-3-1', max => '2015-5-10' },
+            min => '2015-03-01',
+            max => '2015-05-10',
+        };
+    };
+
+    case 'min' => sub {
+        $case = {
+            args => { min => '1979-08-02' },
+            min => '1979-08-02',
+            max => '1980-08-02',
+        };
+    };
+
+    case 'no args' => sub {
+        my $today = localtime;
+        $case = {
+            args => {},
+            min  => $today->ymd,
+            max  => $today->add_years(1)->ymd,
+        };
+    };
+
+    tests 'Random date is between boundaries' => sub {
+        my $rand_date = rand_date( %{$case->{args}} );
+
+        like $rand_date, qr/^\d{4}-\d{2}-\d{2}$/, 'rand_date format';
+
+        my $result = Time::Piece->strptime( $rand_date, '%Y-%m-%d' );
+
+        note $rand_date;
+        cmp_ok $result, '>=', $min_date, 'rand_date >= minimum';
+        cmp_ok $result, '<=', $max_date, 'rand_date <= maximum';
+    };
+};
 
 done_testing;
-
