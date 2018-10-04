@@ -234,7 +234,7 @@ sub rand_set {
         return @{ $options{'set'} }[@results];
     }
     else {
-        return \@{ $options{'set'} }[@results];
+        return [ @{ $options{'set'} }[@results] ];
     }
 }
 
