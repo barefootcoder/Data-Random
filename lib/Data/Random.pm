@@ -139,7 +139,8 @@ sub rand_chars {
         if ( $options{'set'} eq 'all' ) {
             @charset =
               ( 0 .. 9, 'a' .. 'z', 'A' .. 'Z', '#', ',',
-                qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ \ `)
+                qw(~ ! @ $ % ^ & * ( ) _ + = - { } | : " < > ? / . ' ; ] [ `),
+                "\\",
             );
         }
         elsif ( $options{'set'} eq 'alpha' ) {
